@@ -1,29 +1,31 @@
-"use strict"
 import { Router } from 'express'
-import bannerRouter from './banner'
-import productRouter from './product'
-import adminRouter from './admin'
-import usersRouter from './users'
+import authRouter from './auth'
+import heroRouter from './hero'
+import categoryRouter from './category' 
+import courseRouter from './course'
+import { aboutUsRoutes } from './about-us'
+import { privacyPolicyRoutes } from './privacy-policy'
+import { termsConditionRoutes } from './terms-condition'
+import { blogRoutes } from './blog'
+import { faqRoutes } from './faq'
 import { uploadRoutes } from './upload'
-import InquiryRouter from './Inquiries'
-import orderRouter from './order'
-import { downloadContact } from './contact'
+import { adminJWT } from '../helper/jwt'
 
 
 const router = Router()
 // admin 
-router.use('/admin', adminRouter);
+router.use('/auth', authRouter);
 
-// users
-router.use('/users', usersRouter);
+router.use('/hero', heroRouter);
+router.use('/course', courseRouter);
+router.use('/about-us', aboutUsRoutes);
+router.use('/privacy-policy', privacyPolicyRoutes);
+router.use('/terms-condition', termsConditionRoutes);
 
-
-// website page
-router.use('/banner', bannerRouter);
-router.use('/upload', uploadRoutes)
-router.use('/product', productRouter);
-router.use('/inquiry', InquiryRouter);
-router.use('/order', orderRouter);
-router.use('/contact', downloadContact);
+router.use(adminJWT);
+router.use('/category', categoryRouter);
+router.use('/blog', blogRoutes) ;
+router.use('/faq', faqRoutes);
+router.use('/upload', uploadRoutes);
 
 export { router }

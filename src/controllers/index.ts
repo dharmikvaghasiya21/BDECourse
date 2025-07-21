@@ -1,6 +1,9 @@
-export * as bannerController from "./banner";
-export * as productController from "./product";
-export * as adminController from "./admin";
-export * as usersController from './users';
-export * as  InquiryController from './Inquiry';
-export * as  orderController from './order';
+export * as authController from "./auth";
+export * as heroController from "./hero";
+export * as categoryController from "./category";
+export * as courseController from "./course";
+export * as aboutUsController from "./about-us";
+export * as faqController from "./faq";
+export * as privacyPolicyController from "./privacy-policy";
+export * as termsConditionController from "./terms-condition";
+export * as blogController from "./blog";

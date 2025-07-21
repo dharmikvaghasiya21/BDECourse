@@ -23,3 +23,25 @@ export const ADMIN_ROLES = {
     SUPER_ADMIN: "super_admin",
     USER: "user"
 }
+
+export const FAQ_CATEGORIES = {
+    GENERAL: 'general',
+    ORDERS: 'orders',
+    PAYMENTS: 'payments',
+    SHIPPING: 'shipping',
+    RETURNS: 'returns',
+    PRODUCTS: 'products',
+    ACCOUNT: 'account',
+    TECHNICAL: 'technical',
+    PRICING: 'pricing',
+    SECURITY: 'security'
+}
+
+export const USER_ROLE = {
+    ADMIN: "admin",
+    USER: "user",
+}
+
+export const CATEGORY_ACTION = {
+    
+}
