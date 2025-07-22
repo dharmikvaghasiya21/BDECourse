@@ -56,17 +56,13 @@ export const getBannerById = async (req: Request, res: Response) => {
 
 export const editBanner = async (req: Request, res: Response) => {
   try {
-    const  body  = req.body;
-    console.log("sjsj====",body);
-    // console.log("sjsj====",id);
-    
+    const  body  = req.body;    
     // if (!id) { return res.status(400).json(new apiResponse(400, "ID is required", null, null)); }
 
     const updateData: any =  body ;
-    console.log("update=======",updateData);
     
     const updated = await bannerModel.findOneAndUpdate({ id: body._id }, updateData, { new: true });
-    console.log("update-----------",updated);
+
     if (!updated) {
       return res.status(404).json(new apiResponse(404, "Banner not found", null, null));
     }

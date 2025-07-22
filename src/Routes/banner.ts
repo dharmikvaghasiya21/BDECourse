@@ -1,6 +1,7 @@
 // routes/profileRoutes.ts
 import express from 'express';
 import { bannerController } from '../controllers';
+import { adminJWT } from '../helper/jwt';
 
 const router = express.Router();
 // students
@@ -8,6 +9,7 @@ router.get("/getall", bannerController.getAllBanner);
 router.get("/get/:id", bannerController.getBannerById);
 
 // admin
+router.use(adminJWT)
 router.post('/add', bannerController.addBanner);
 router.put("/edit", bannerController.editBanner);
 router.delete("/delete/:id", bannerController.deleteBanner);
