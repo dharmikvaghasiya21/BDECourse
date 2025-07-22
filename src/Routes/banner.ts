@@ -14,5 +14,4 @@ router.post('/add', bannerController.addBanner);
 router.post("/edit", bannerController.editBanner);
 router.delete("/delete/:id", bannerController.deleteBanner);
 
-
 export default router;
