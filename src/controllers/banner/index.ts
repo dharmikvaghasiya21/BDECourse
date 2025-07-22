@@ -1,24 +1,23 @@
 import { Request, Response } from "express";
-import { heroModel } from "../../database";
+import { bannerModel } from "../../database";
 import { apiResponse } from "../../common";
 import { responseMessage } from "../../helper";
+import { config } from "../../../config";
 
-export const addHero = async (req: Request, res: Response) => {
+export const addBanner = async (req: Request, res: Response) => {
   try {
-    const { title, youtubeLink } = req.body;
+    const { body } = req.body;
     const file = req.file;
-
     if (!file) { return res.status(400).json(new apiResponse(400, "Image file is required", {}, null)); }
-    const imagePath = `/uploads/${file.filename}`;
-    const banner = await heroModel.create({ title, youtubeLink, image: imagePath, });
-
-    return res.status(201).json(new apiResponse(201, "Hero section created", banner, null));
+    // const imagePath = `${config.BACKEND_URL}/uploads/${file.filename}`;
+    const banner = await bannerModel.create({ body });
+    return res.status(201).json(new apiResponse(201, "banner section created", banner, null));
   } catch (error) {
     return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
   }
 };
 
-export const getAllHero = async (req: Request, res: Response) => {
+export const getAllBanner = async (req: Request, res: Response) => {
   try {
     const search = req.query.search as string || "";
     const page = parseInt(req.query.page as string) || 1;
@@ -33,11 +32,11 @@ export const getAllHero = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const [banners, total] = await Promise.all([
-      heroModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
-      heroModel.countDocuments(query)
+      bannerModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      bannerModel.countDocuments(query)
     ]);
 
-    return res.status(200).json(new apiResponse(200, "heroModels fetched", {
+    return res.status(200).json(new apiResponse(200, "bannerModels fetched", {
       banners,
       pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
     }, null));
@@ -47,9 +46,9 @@ export const getAllHero = async (req: Request, res: Response) => {
 };
 
 
-export const getHeroById = async (req: Request, res: Response) => {
+export const getBannerById = async (req: Request, res: Response) => {
   try {
-    const banner = await heroModel.findById(req.params.id);
+    const banner = await bannerModel.findById(req.params.id);
     if (!banner) return res.status(404).json(new apiResponse(404, "Banner not found", null, null));
     return res.status(200).json(new apiResponse(200, "Banner found", banner, null));
   } catch (error) {
@@ -57,7 +56,7 @@ export const getHeroById = async (req: Request, res: Response) => {
   }
 };
 
-export const editHero = async (req: Request, res: Response) => {
+export const editBanner = async (req: Request, res: Response) => {
   try {
     const { id, title, action } = req.body;
     if (!id) { return res.status(400).json(new apiResponse(400, "ID is required", null, null)); }
@@ -67,7 +66,7 @@ export const editHero = async (req: Request, res: Response) => {
     if (req.file) {
       updateData.image = `/uploads/${req.file.filename}`;
     }
-    const updated = await heroModel.findOneAndUpdate({ _id: id }, updateData, { new: true });
+    const updated = await bannerModel.findOneAndUpdate({ _id: id }, updateData, { new: true });
     if (!updated) {
       return res.status(404).json(new apiResponse(404, "Banner not found", null, null));
     }
@@ -79,9 +78,9 @@ export const editHero = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteHero = async (req: Request, res: Response) => {
+export const deleteBanner = async (req: Request, res: Response) => {
   try {
-    const deleted = await heroModel.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
+    const deleted = await bannerModel.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
     if (!deleted) {
       return res.status(404).json(new apiResponse(404, "Banner not found", null, null));
     }

@@ -2,7 +2,7 @@
 import { required } from "joi";
 import mongoose from "mongoose";
 
-const heroSchema = new mongoose.Schema({
+const bannerSchema = new mongoose.Schema({
     title: { type: String },
     image: { type: String, required: true },
     youtubeLink: { type: String },
@@ -10,4 +10,4 @@ const heroSchema = new mongoose.Schema({
     action: { type: String, enum: ['active', 'inactive'], default: 'inactive', },
 }, { timestamps: true, versionKey: false });
 
-export const heroModel = mongoose.model("hero", heroSchema);
+export const bannerModel = mongoose.model("banner", bannerSchema);

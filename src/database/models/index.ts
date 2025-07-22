@@ -1,5 +1,5 @@
 export * from './user';
-export * from './hero';
+export * from './banner';
 export * from './category';
 export * from './course';
 export * from './about-us';

@@ -43,5 +43,5 @@ export const USER_ROLE = {
 }
 
 export const CATEGORY_ACTION = {
-    
+
 }
