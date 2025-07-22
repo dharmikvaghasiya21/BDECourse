@@ -7,11 +7,12 @@ const router = express.Router();
 
 router.post('/signUp', authController.signUp);
 router.post('/login', authController.login);
-router.post('/forgot_password', authController.forgot_password);
-router.post('/verify_otp', authController.verify_otp);
-router.post('/reset_password', authController.reset_password);
+router.post('/forgot-password', authController.forgot_password);
+router.post('/verify-otp', authController.verify_otp);
+router.post('/reset-password', authController.reset_password);
 
 router.use(adminJWT)
-router.put('/change_password', authController.change_password)
+router.post('/change-password', authController.change_password)
 
 export default router;
+

@@ -141,19 +141,16 @@ export const reset_password = async (req: Request, res: Response) => {
   try {
     const { email, newPassword } = req.body;
 
-    // 1. Find user by email
     const user = await userModel.findOne({ email, isDeleted: false });
 
     if (!user) {
       return res.status(400).json(new apiResponse(400, "Email not found", {}, {}));
     }
 
-    // 2. Check OTP expiry (if OTP required)
     if (user.otpExpireTime && user.otpExpireTime < new Date()) {
       return res.status(400).json(new apiResponse(400, "OTP has expired", {}, {}));
     }
 
-    // 3. Hash new password
     const hashedPassword = await bcryptjs.hash(newPassword, 10);
 
     await userModel.findByIdAndUpdate(user._id, {
@@ -194,19 +191,21 @@ export const change_password = async (req: Request, res: Response) => {
     const { email, oldPassword, newPassword, confirmPassword } = req.body;
 
     const user = await userModel.findOne({ email });
+
     if (!user) {
       return res.status(404).json({ success: false, message: "Email not found." });
     }
+
     const isMatch = await bcryptjs.compare(oldPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: "Old password is incorrect." });
     }
+
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ success: false, message: "New password and confirm password do not match." });
     }
 
     user.confirmPassword = confirmPassword;
-
     const hashedPassword = await bcryptjs.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();

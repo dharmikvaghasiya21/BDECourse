@@ -11,7 +11,7 @@ router.get("/get/:id", bannerController.getBannerById);
 // admin
 router.use(adminJWT)
 router.post('/add', bannerController.addBanner);
-router.put("/edit", bannerController.editBanner);
+router.post("/edit", bannerController.editBanner);
 router.delete("/delete/:id", bannerController.deleteBanner);
 
 
