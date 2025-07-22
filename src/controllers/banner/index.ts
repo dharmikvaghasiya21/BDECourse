@@ -26,7 +26,6 @@ export const getAllBanner = async (req: Request, res: Response) => {
     if (search) {
       query.title = { $regex: search, $options: "i" };
     }
-
     const skip = (page - 1) * limit;
 
     const [banners, total] = await Promise.all([
@@ -58,7 +57,6 @@ export const editBanner = async (req: Request, res: Response) => {
   try {
     const  body  = req.body;    
     // if (!id) { return res.status(400).json(new apiResponse(400, "ID is required", null, null)); }
-
     const updateData: any =  body ;
     
     const updated = await bannerModel.findOneAndUpdate({ id: body._id }, updateData, { new: true });
