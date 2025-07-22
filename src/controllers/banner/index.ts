@@ -4,18 +4,16 @@ import { apiResponse } from "../../common";
 import { responseMessage } from "../../helper";
 import { config } from "../../../config";
 
-export const addBanner = async (req: Request, res: Response) => {
+export const addBanner = async (req, res) => {
   try {
-    const { body } = req.body;
-    const file = req.file;
-    if (!file) { return res.status(400).json(new apiResponse(400, "Image file is required", {}, null)); }
-    // const imagePath = `${config.BACKEND_URL}/uploads/${file.filename}`;
-    const banner = await bannerModel.create({ body });
-    return res.status(201).json(new apiResponse(201, "banner section created", banner, null));
+    const body = req.body;
+    const banner = await bannerModel.create(body);
+    return res.status(201).json(new apiResponse(201, "Banner section created", banner, null));
   } catch (error) {
     return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
   }
 };
+
 
 export const getAllBanner = async (req: Request, res: Response) => {
   try {
@@ -58,15 +56,17 @@ export const getBannerById = async (req: Request, res: Response) => {
 
 export const editBanner = async (req: Request, res: Response) => {
   try {
-    const { id, title, action } = req.body;
-    if (!id) { return res.status(400).json(new apiResponse(400, "ID is required", null, null)); }
+    const  body  = req.body;
+    console.log("sjsj====",body);
+    // console.log("sjsj====",id);
+    
+    // if (!id) { return res.status(400).json(new apiResponse(400, "ID is required", null, null)); }
 
-    const updateData: any = { title, action, };
-
-    if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
-    }
-    const updated = await bannerModel.findOneAndUpdate({ _id: id }, updateData, { new: true });
+    const updateData: any =  body ;
+    console.log("update=======",updateData);
+    
+    const updated = await bannerModel.findOneAndUpdate({ id: body._id }, updateData, { new: true });
+    console.log("update-----------",updated);
     if (!updated) {
       return res.status(404).json(new apiResponse(404, "Banner not found", null, null));
     }

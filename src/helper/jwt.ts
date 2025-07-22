@@ -11,7 +11,7 @@ const jwt_token_secret = config.JWT_TOKEN_SECRET;
 export const adminJWT = async (req: Request, res: Response, next) => {
     let { authorization } = req.headers,
         result: any
-        console.log("authorization => ",authorization)
+        // console.log("authorization===========",authorization)
     if (authorization) {
         try {
             let isVerifyToken = jwt.verify(authorization, jwt_token_secret)

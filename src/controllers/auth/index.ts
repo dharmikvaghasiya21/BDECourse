@@ -64,8 +64,7 @@ export const login = async (req: Request, res: Response) => {
     const responseData = {
       token,
       user: {
-        email: user.email,
-        phoneNumber: user.phoneNumber,
+        _id: user._id,
         userType: user.role || "user"
       }
     };
@@ -135,7 +134,6 @@ export const verify_otp = async (req: Request, res: Response) => {
 export const reset_password = async (req: Request, res: Response) => {
   try {
     const { email, newPassword } = req.body;
-
     const user = await userModel.findOne({ email, isDeleted: false });
 
     if (!user) {
@@ -145,21 +143,37 @@ export const reset_password = async (req: Request, res: Response) => {
     if (user.otpExpireTime && user.otpExpireTime < new Date()) {
       return res.status(400).json(new apiResponse(400, "OTP has expired", {}, {}));
     }
+
     const hashedPassword = await bcryptjs.hash(newPassword, 10);
 
-    await userModel.findByIdAndUpdate(user._id, {
+    await userModel.findOneAndUpdate(user._id, {
       password: hashedPassword,
       confirmPassword: newPassword,
       otp: null,
       otpExpireTime: null
     });
 
-    return res.status(200).json(new apiResponse(200, "Password has been reset successfully", {}, {}));
+    const payload = {
+      _id: user._id,
+      role: user.role,
+    };
+
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+    const userData = {
+      _id: user._id,
+      role: user.role
+    };
+
+    return res.status(200).json(
+      new apiResponse(200, "Password has been reset successfully", { token, user: userData }, {})
+    );
+
   } catch (error) {
     console.error("Reset password error:", error);
-    return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError || "internal Server Error", {}, error));
+    return res.status(500).json(
+      new apiResponse(500, responseMessage?.internalServerError || "Internal Server Error", {}, error)
+    );
   }
-
 };
 
 export const change_password = async (req: Request, res: Response) => {
@@ -188,5 +202,5 @@ export const change_password = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Forgot password error:", error);
     return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError || "internal Server Error", {}, error));
-}
+  }
 };
