@@ -24,9 +24,9 @@ router.use('/privacy-policy', privacyPolicyRoutes);
 router.use('/terms-condition', termsConditionRoutes);
 
 router.use(adminJWT);
+router.use('/upload',uploadRoutes);
 router.use('/category', categoryRouter);
 router.use('/blog', blogRoutes) ;
 router.use('/faq', faqRoutes);
-router.use('/upload', uploadRoutes);
 
 export { router }

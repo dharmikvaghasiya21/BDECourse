@@ -7,7 +7,7 @@ import { userModel } from "../../database/models";
 import jwt from "jsonwebtoken";
 
 
-const JWT_SECRET = process.env.JWT_SECRET || "yourSecretKey";
+const JWT_SECRET = process.env.JWT_TOKEN_SECRET || "yourSecretKey";
 
 const TOKEN_EXPIRE = "1d";
 
@@ -56,9 +56,9 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json(new apiResponse(400, "Invalid email or password", {}, {}));
     }
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { _id: user._id, role: user.role },
       JWT_SECRET,
-      { expiresIn: TOKEN_EXPIRE }
+      {}
     );
 
     const responseData = {
