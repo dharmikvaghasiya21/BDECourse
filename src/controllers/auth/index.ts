@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_TOKEN_SECRET || "yourSecretKey";
 
-const TOKEN_EXPIRE = "1d";
+// const TOKEN_EXPIRE = "1d";
 
 export const signUp = async (req: Request, res: Response) => {
   try {
@@ -56,7 +56,11 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json(new apiResponse(400, "Invalid email or password", {}, {}));
     }
     const token = jwt.sign(
-      { _id: user._id, role: user.role },
+      {
+        _id: user._id,
+        role: user.role
+
+      },
       JWT_SECRET,
       {}
     );
@@ -65,9 +69,12 @@ export const login = async (req: Request, res: Response) => {
       token,
       user: {
         _id: user._id,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
         userType: user.role || "user"
       }
     };
+    console.log("res===", responseData)
     return res.status(200).json(new apiResponse(200, "Login successful", responseData, {}));
   } catch (error) {
     return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError || "Internal server error", {}, error));
@@ -130,23 +137,26 @@ export const verify_otp = async (req: Request, res: Response) => {
   }
 };
 
-
 export const reset_password = async (req: Request, res: Response) => {
   try {
     const { email, newPassword } = req.body;
+
+    // 1. Find user by email
     const user = await userModel.findOne({ email, isDeleted: false });
 
     if (!user) {
       return res.status(400).json(new apiResponse(400, "Email not found", {}, {}));
     }
 
+    // 2. Check OTP expiry (if OTP required)
     if (user.otpExpireTime && user.otpExpireTime < new Date()) {
       return res.status(400).json(new apiResponse(400, "OTP has expired", {}, {}));
     }
 
+    // 3. Hash new password
     const hashedPassword = await bcryptjs.hash(newPassword, 10);
 
-    await userModel.findOneAndUpdate(user._id, {
+    await userModel.findByIdAndUpdate(user._id, {
       password: hashedPassword,
       confirmPassword: newPassword,
       otp: null,
@@ -155,12 +165,15 @@ export const reset_password = async (req: Request, res: Response) => {
 
     const payload = {
       _id: user._id,
+      email: user.email,
       role: user.role,
+      phoneNumber: user.phoneNumber
     };
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
     const userData = {
       _id: user._id,
+      email: user.email,
       role: user.role
     };
 
