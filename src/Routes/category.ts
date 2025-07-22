@@ -8,7 +8,6 @@ const router = express.Router();
 router.get("/getall", categoryController.getAllCategories);
 router.get("/get/:id", categoryController.getCategoryById);
 
-
 // Admin Routes
 router.post("/add",  categoryController.addCategory);
 router.post("/edit", categoryController.editCategory);

@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import bcryptjs from "bcryptjs";
 import { ADMIN_ROLES, apiResponse } from "../../common";
-import { responseMessage, sendEmail } from "../../helper";
+import { reqInfo, responseMessage, sendEmail } from "../../helper";
 import { userModel } from "../../database/models";
 import jwt from "jsonwebtoken";
 
@@ -12,6 +12,7 @@ const JWT_SECRET = process.env.JWT_TOKEN_SECRET || "yourSecretKey";
 // const TOKEN_EXPIRE = "1d";
 
 export const signUp = async (req: Request, res: Response) => {
+    reqInfo(req)
   try {
     const body = req.body;
     let existingUser = await userModel.findOne({ email: body?.email, isDeleted: false });
@@ -43,8 +44,10 @@ export const signUp = async (req: Request, res: Response) => {
   }
 };
 
+
 export const login = async (req: Request, res: Response) => {
-  try {
+    reqInfo(req)
+      try {
     const { email, password } = req.body;
     const user = await userModel.findOne({ email, isDeleted: false }).lean();
     if (!user) {
@@ -83,11 +86,11 @@ export const login = async (req: Request, res: Response) => {
 
 
 
-export const forgot_password = async (req: Request, res: Response) => {
+export const forgot_password = async (req, res) => {
   let body = req.body,
     otpFlag = 1,
     otp = 0;
-
+reqInfo(req)
   try {
     body.isActive = true;
     const user = await userModel.findOne({
@@ -118,7 +121,8 @@ export const forgot_password = async (req: Request, res: Response) => {
 };
 
 
-export const verify_otp = async (req: Request, res: Response) => {
+export const verify_otp = async (req, res) => {
+  reqInfo(req)
   try {
     const { email, otp } = req.body;
 
@@ -137,7 +141,8 @@ export const verify_otp = async (req: Request, res: Response) => {
   }
 };
 
-export const reset_password = async (req: Request, res: Response) => {
+export const reset_password = async (req, res) => {
+  reqInfo(req)
   try {
     const { email, newPassword } = req.body;
 
@@ -186,12 +191,12 @@ export const reset_password = async (req: Request, res: Response) => {
   }
 };
 
-export const change_password = async (req: Request, res: Response) => {
+export const change_password = async (req, res) => {
+  reqInfo(req)
   try {
     const { email, oldPassword, newPassword, confirmPassword } = req.body;
 
     const user = await userModel.findOne({ email });
-
     if (!user) {
       return res.status(404).json({ success: false, message: "Email not found." });
     }

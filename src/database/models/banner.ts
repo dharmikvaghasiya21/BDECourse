@@ -1,5 +1,3 @@
-// models/user.model.ts
-import { required } from "joi";
 import mongoose from "mongoose";
 
 const bannerSchema = new mongoose.Schema({

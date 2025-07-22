@@ -26,7 +26,7 @@ router.use('/terms-condition', termsConditionRoutes);
 router.use(adminJWT);
 router.use('/upload',uploadRoutes);
 router.use('/category', categoryRouter);
-router.use('/blog', blogRoutes) ;
+router.use('/blog', blogRoutes);
 router.use('/faq', faqRoutes);
 
 export { router }
