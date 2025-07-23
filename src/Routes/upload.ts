@@ -14,7 +14,7 @@ router.post("", (req: any, res: any) => {
         if (!file) {
             return res.status(400).json(new apiResponse(400, "Image file is missing", {}, {}));
         }
-        let imageUrl = config.BACKEND_URL + `/images/${file.filename}`;
+        let imageUrl = config.BACKEND_URL + `/uploads/${file.filename}`;
         return res.status(200).json(new apiResponse(200, responseMessage.addDataSuccess("Image"), imageUrl, {}));
     } catch (error) {
         console.log(error)
@@ -37,7 +37,6 @@ router.delete("/", (req: any, res: any) => {
         const imagePath = path.join(process.cwd(), "uploads", filename);
         if (!fs.existsSync(imagePath)) return res.status(404).json(new apiResponse(404, "Image not found", {}, {}));
         fs.unlinkSync(imagePath);
-        console.log("Image path:", imagePath);
 
         return res.status(200).json(new apiResponse(200, "Image deleted successfully", {}, {}));
     } catch (error) {
