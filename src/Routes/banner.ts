@@ -5,8 +5,8 @@ import { adminJWT } from '../helper/jwt';
 
 const router = express.Router();
 // students
-router.get("/getall", bannerController.getAllBanner);
-router.get("/get/:id", bannerController.getBannerById);
+router.get("/", bannerController.getAllBanner);
+router.get("/:id", bannerController.getBannerById);
 
 // admin
 router.use(adminJWT)

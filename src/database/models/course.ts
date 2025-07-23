@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
 const courseSchema = new mongoose.Schema({
-    name: { type: String },
-    image: { type: String },
+    name: { type: String ,required: true},
+    image: { type: String,required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
     categoryType: { type: mongoose.Schema.Types.ObjectId, ref: "category" },
     feature: { type: Boolean, default: false },

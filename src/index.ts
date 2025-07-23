@@ -10,12 +10,15 @@ import multer from "multer"
 import fs from 'fs';
 const app = express();
 
-app.use("/images", express.static(path.join(__dirname, "..", "..", "uploads")));
+app.use("/pdf", express.static(path.join(__dirname, "..", "..", "pdf")));
+app.use("/uploads", express.static(path.join(__dirname, "..", "..", "uploads")));
+
 const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === "image/png" ||
     file.mimetype === "image/jpg" ||
-    file.mimetype === "image/jpeg"
+    file.mimetype === "image/jpeg" ||
+    file.mimetype === "application/pdf"
   ) {
     cb(null, true);
   } else {
@@ -25,11 +28,7 @@ const fileFilter = (req, file, cb) => {
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = "uploads";
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
-    }
-    cb(null, dir);
+    cb(null, "uploads");
   },
   filename: (req, file, cb) => {
     const sanitizedOriginalName = file.originalname.replace(/\s+/g, "-");
@@ -42,7 +41,7 @@ app.use(mongooseConnection)
 app.use(bodyParser.json({ limit: '200mb' }))
 app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }))
 app.use(express.static(path.join(__dirname, "public")));
-app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single("image"));
+app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).fields([{ name: "image", maxCount: 1 }, { name: "pdf", maxCount: 1 }]));
 
 const health = (req, res) => {
   return res.status(200).json({

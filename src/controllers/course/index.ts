@@ -10,11 +10,11 @@ export const addCourse = async (req, res) => {
     reqInfo(req);
     try {
         const body = req.body;
-
         const user = req.user || req.headers.user;
         body.userId = user._id;
+
         const Course = await new courseModel(body).save();
-        return res.status(201).json(new apiResponse(201, "Course created", Course, null));
+        return res.status(200).json(new apiResponse(200, "Course created", Course, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
@@ -58,8 +58,8 @@ export const getCourseById = async (req, res) => {
     reqInfo(req);
     try {
         const course = await courseModel.findOne({ _id: req.params.id, isDeleted: false }).populate("categoryType");
-        if (!course) return res.status(404).json(new apiResponse(404, "Course not found", null, null));
-        return res.status(200).json(new apiResponse(200, "Course fetched", course, null));
+        if (!course) return res.status(404).json(new apiResponse(404, "Course not found", {}, {}));
+        return res.status(200).json(new apiResponse(200, "Course fetched", course, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
@@ -71,8 +71,8 @@ export const editCourse = async (req, res) => {
         const { id } = req.body;
         const body = req.body;
         const updated = await courseModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
-        if (!updated) { return res.status(404).json(new apiResponse(404, "Course not found", null, null)); }
-        return res.status(200).json(new apiResponse(200, "Course updated", updated, null));
+        if (!updated) { return res.status(404).json(new apiResponse(404, "Course not found", {}, {})); }
+        return res.status(200).json(new apiResponse(200, "Course updated", updated, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
@@ -83,10 +83,9 @@ export const deleteCourse = async (req, res) => {
     reqInfo(req);
     try {
         const deleted = await courseModel.findOneAndUpdate({ _id: req.params.id }, { isDeleted: true });
-        if (!deleted) return res.status(404).json(new apiResponse(404, "Course not found", null, null));
-        return res.status(200).json(new apiResponse(200, "Course deleted (soft delete)", null, null));
+        if (!deleted) return res.status(404).json(new apiResponse(404, "Course not found", {}, {}));
+        return res.status(200).json(new apiResponse(200, "Course deleted (soft delete)", {}, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
- 

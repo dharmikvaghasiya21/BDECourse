@@ -12,7 +12,7 @@ export const addCategory = async (req, res) => {
         body.userId = user._id;
 
         const category = await new categoryModel(body).save();
-        return res.status(201).json(new apiResponse(201, "Category created", category, null));
+        return res.status(200).json(new apiResponse(200, "Category created", category, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
@@ -27,7 +27,7 @@ export const editCategory = async (req, res) => {
 
         if (!updated) return res.status(404).json(new apiResponse(404, "Category not found", null, null));
 
-        return res.status(200).json(new apiResponse(200, "Category updated", updated, null));
+        return res.status(200).json(new apiResponse(200, "Category updated", updated, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
@@ -40,7 +40,7 @@ export const deleteCategory = async (req, res) => {
         const deleted = await categoryModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, { isDeleted: true }, { new: true });
         if (!deleted) return res.status(404).json(new apiResponse(404, "Category not found", null, null));
 
-        return res.status(200).json(new apiResponse(200, "Category deleted (soft)", null, null));
+        return res.status(200).json(new apiResponse(200, "Category deleted (soft)", {}, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
@@ -86,7 +86,7 @@ export const getCategoryById = async (req, res) => {
         const { id } = req.params;
         const category = await categoryModel.findOne({ _id: new ObjectId(id), isDeleted: false });
         if (!category) return res.status(404).json(new apiResponse(404, "Category not found", null, null));
-        return res.status(200).json(new apiResponse(200, "Category fetched", category, null));
+        return res.status(200).json(new apiResponse(200, "Category fetched", category, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }

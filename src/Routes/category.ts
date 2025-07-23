@@ -5,8 +5,8 @@ import { categoryController } from '../controllers';
 const router = express.Router();
 
 // Student Routes
-router.get("/getall", categoryController.getAllCategories);
-router.get("/get/:id", categoryController.getCategoryById);
+router.get("/", categoryController.getAllCategories);
+router.get("/:id", categoryController.getCategoryById);
 
 // Admin Routes
 router.post("/add",  categoryController.addCategory);

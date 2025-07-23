@@ -1,9 +1,10 @@
+import { required } from "joi";
 import mongoose from "mongoose";
 
 const bannerSchema = new mongoose.Schema({
-    title: { type: String },
+    title: { type: String, required: true},
     image: { type: String, required: true },
-    youtubeLink: { type: String },
+    youtubeLink: { type: String ,required  :true},
     action: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
 }, { timestamps: true, versionKey: false });

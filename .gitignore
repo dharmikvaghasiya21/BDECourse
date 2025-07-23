@@ -5,3 +5,6 @@ package-lock.json
 test.js
 test.html
 *.bat
+.env
+uploads
+pdf

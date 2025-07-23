@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema({
-  image: { type: String },
+  image: { type: String ,required: true},
   categoryName: { type: String, trim: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
   feature: { type: Boolean, default: false },

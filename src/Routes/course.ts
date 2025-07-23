@@ -4,8 +4,8 @@ import { courseController } from '../controllers';
 
 const router = express.Router();
 // students
-router.get("/getall", courseController.getAllCourses);
-router.get("/get/:id", courseController.getCourseById);
+router.get("/", courseController.getAllCourses);
+router.get("/:id", courseController.getCourseById);
 
 // admin
 router.post('/add', courseController.addCourse);
