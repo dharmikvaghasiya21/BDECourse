@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { bannerModel } from "../../database";
 import { apiResponse } from "../../common";
-import { reqInfo, responseMessage } from "../../helper";
+import { countData, getData, reqInfo, responseMessage } from "../../helper";
 import { config } from "../../../config";
 
 let ObjectId = require("mongoose").Types.ObjectId;
@@ -18,32 +18,38 @@ export const addBanner = async (req, res) => {
 };
 
 
-export const getAllBanner = async (req, res) => {
-  reqInfo(req)
-  try {
-    const search = req.query.search as string || "";
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+export const getAllBanner= async (req, res) => {
+    reqInfo(req);
+    try {
+        let { type, search, page, limit  } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
+        if (type) criteria.type = type;
+        if (search) {
+            criteria.title = { $regex: search, $options: 'si'};
+        }
+        const pageNum = parseInt(page) || 1;
+        const limitNum = parseInt(limit) || 1;
 
-    const query: any = { isDeleted: false };  
-    if (search) {
-      query.title = { $regex: search, $options: "i" };
+        if (page && limit) {
+            options.skip = (parseInt(page) - 1) * parseInt(limit);
+            options.limit = parseInt(limit);
+        }
+
+        const response = await getData(bannerModel, criteria, {}, options);
+        const totalCount = await countData(bannerModel, criteria);
+
+        const stateObj = {
+            page: pageNum,
+            limit: limitNum,
+            page_limit: Math.ceil(totalCount / limitNum) || 1,
+        };
+
+        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('Banners'), { banner_data: response, totalData: totalCount, state: stateObj }, {}));
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
-    const skip = (page - 1) * limit;
-
-    const [banners, total] = await Promise.all([
-      bannerModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
-      bannerModel.countDocuments(query)
-    ]);
-
-    return res.status(200).json(new apiResponse(200, "bannerModels fetched", {
-      banners,
-      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
-    }, null));
-  } catch (error) {
-    return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError, {}, error));
-  }
 };
+
 
 
 export const getBannerById = async (req, res) => {

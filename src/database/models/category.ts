@@ -5,7 +5,7 @@ const categorySchema = new mongoose.Schema({
   categoryName: { type: String, trim: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
   feature: { type: String, enum: ["regular", "trending", "new"], default: "regular" },
-  action: { type: String, enum: ["active", "inactive"], default: "active" },
+  action: { type: Boolean, default: false },
   isDeleted: { type: Boolean, default: false }
 }, { timestamps: true, versionKey: false });
 

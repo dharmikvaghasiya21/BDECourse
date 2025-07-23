@@ -1,6 +1,6 @@
 import { apiResponse, USER_ROLE } from "../../common";
 import { categoryModel } from "../../database";
-import { responseMessage } from "../../helper";
+import { countData, getData, reqInfo, responseMessage } from "../../helper";
 
 let ObjectId = require("mongoose").Types.ObjectId;
 
@@ -21,7 +21,7 @@ export const editCategory = async (req, res) => {
     try {
         const { id } = req.body;
         const body = req.body;
-        const updated = await categoryModel.findOneAndUpdate({ _id: new ObjectId(id),isDeleted:false }, body, { new: true });
+        const updated = await categoryModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
 
         if (!updated) return res.status(404).json(new apiResponse(404, "Category not found", null, null));
 
@@ -44,18 +44,37 @@ export const deleteCategory = async (req, res) => {
 };
 
 export const getAllCategories = async (req, res) => {
-    let { user } = req.headers, criteria: any = {}
+    reqInfo(req);
     try {
-        if (user.role === USER_ROLE.USER) {
-            criteria.userId = new ObjectId(user._id)
+        let { type, search, page, limit } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
+        if (type) criteria.type = type;
+        if (search) {
+            criteria.title = { $regex: search, $options: 'si' };
         }
-        const categories = await categoryModel.find({ ...criteria, isDeleted: false }).sort({ createdAt: -1 });
+        const pageNum = parseInt(page) || 1;
+        const limitNum = parseInt(limit) || 1;
 
-        return res.status(200).json(new apiResponse(200, "Categories fetched", categories, null));
+        if (page && limit) {
+            options.skip = (parseInt(page) - 1) * parseInt(limit);
+            options.limit = parseInt(limit);
+        }
+        const response = await getData(categoryModel, criteria, {}, options);
+        const totalCount = await countData(categoryModel, criteria);
+
+        const stateObj = {
+            page: pageNum,
+            limit: limitNum,
+            page_limit: Math.ceil(totalCount / limitNum) || 1,
+        };
+
+        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('Categories fetched'),
+            { category_data: response, totalData: totalCount, state: stateObj }, {}));
     } catch (error) {
+        console.log(error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
+
 
 
 export const getCategoryById = async (req, res) => {
