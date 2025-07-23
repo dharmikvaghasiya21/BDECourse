@@ -4,8 +4,8 @@ const categorySchema = new mongoose.Schema({
   image: { type: String },
   categoryName: { type: String, trim: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
-  feature: { type: String, enum: ["regular", "trending", "new"], default: "regular" },
-  action: { type: Boolean, default: false },
+  feature: { type: Boolean, default: false },
+  action: { type: Boolean, default: true },
   isDeleted: { type: Boolean, default: false }
 }, { timestamps: true, versionKey: false });
 

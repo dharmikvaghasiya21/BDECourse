@@ -3,9 +3,11 @@ import mongoose from "mongoose";
 const courseSchema = new mongoose.Schema({
     name: { type: String },
     image: { type: String },
-    feature: { type: String, enum: ["regular", "trending", "new"], default: "regular" },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
     categoryType: { type: mongoose.Schema.Types.ObjectId, ref: "category" },
-    action: { type: String, enum: ["active", "inactive"], default: "active" },
+    feature: { type: Boolean, default: false },
+    action: { type: Boolean, default: true },
+    locked: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false }
 }, { timestamps: true, versionKey: false });
 

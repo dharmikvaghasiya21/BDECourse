@@ -1,67 +1,52 @@
 import { Request, Response } from "express";
 import { courseModel } from "../../database";
 import { apiResponse } from "../../common";
-import { responseMessage } from "../../helper";
+import { countData, getData, reqInfo, responseMessage } from "../../helper";
 import mongoose from "mongoose";
 
-
-export const addCourse = async (req: Request, res: Response) => {
+export const addCourse = async (req, res) => {
     try {
-        const { name, feature, categoryType, action } = req.body;
-        const image = req.file?.filename;
-        if (!image) return res.status(400).json(new apiResponse(400, "Image required", {}, null));
-
-        const newCourse = await courseModel.create({
-            name,
-            feature,
-            categoryType,
-            action,
-            image: `/uploads/${image}`
-        });
-
-        return res.status(201).json(new apiResponse(201, "Course created", newCourse, null));
+        const body = req.body;
+        
+        const user = req.user || req.headers.user;
+        body.userId = user._id;
+        const Course = await new courseModel(body).save();
+        return res.status(201).json(new apiResponse(201, "Course created", Course, null));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
 
-export const getAllCourses = async (req: Request, res: Response) => {
+
+export const getAllCourses = async (req, res) => {
+    reqInfo(req);
     try {
-        const { page = "1", limit = "20", search = "" } = req.query as {
-            page?: string; limit?: string; search?: string;
+        let { type, search, page, limit } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
+        if (type) criteria.type = type;
+        if (search) {
+            criteria.title = { $regex: search, $options: 'si' };
+        }
+        const pageNum = parseInt(page) || 1;
+        const limitNum = parseInt(limit) || 1;
+
+        if (page && limit) {
+            options.skip = (parseInt(page) - 1) * parseInt(limit);
+            options.limit = parseInt(limit);
+        }
+        const response = await getData(courseModel, criteria, {}, options);
+        const totalCount = await countData(courseModel, criteria);
+
+        const stateObj = {
+            page: pageNum,
+            limit: limitNum,
+            page_limit: Math.ceil(totalCount / limitNum) || 1,
         };
 
-        const pageNumber = parseInt(page);
-        const limitNumber = parseInt(limit);
-
-        const query: any = { isDeleted: false };
-
-        if (search) {
-            query.name = { $regex: search, $options: "i" }; // case-insensitive search
-        }
-
-        const courses = await courseModel
-            .find(query)
-            .populate("categoryType")
-            .skip((pageNumber - 1) * limitNumber)
-            .limit(limitNumber)
-            .sort({ createdAt: -1 });
-
-        const totalCourses = await courseModel.countDocuments(query);
-
-        return res.status(200).json(
-            new apiResponse(200, "Courses fetched", {
-                total: totalCourses,
-                page: pageNumber,
-                limit: limitNumber,
-                totalPages: Math.ceil(totalCourses / limitNumber),
-                courses,
-            }, null)
-        );
+        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('Categories fetched'),
+            { category_data: response, totalData: totalCount, state: stateObj }, {}));
     } catch (error) {
-        return res.status(500).json(
-            new apiResponse(500, responseMessage.internalServerError, {}, error)
-        );
+        console.log(error);
+        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
 

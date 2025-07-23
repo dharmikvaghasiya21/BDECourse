@@ -18,12 +18,12 @@ router.use('/auth', authRouter);
 router.use('/user', userRouter);
 
 router.use('/banner', bannerRouter);
-router.use('/course', courseRouter);
 router.use('/about-us', aboutUsRoutes);
 router.use('/privacy-policy', privacyPolicyRoutes);
 router.use('/terms-condition', termsConditionRoutes);
 
 router.use(adminJWT);
+router.use('/course', courseRouter);
 router.use('/upload',uploadRoutes);
 router.use('/category', categoryRouter);
 router.use('/blog', blogRoutes);

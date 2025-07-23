@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { responseMessage } from '../helper';
+import { reqInfo, responseMessage } from '../helper';
 import { config } from '../../config';
 import { apiResponse } from '../common';
 import fs from 'fs';
@@ -22,7 +22,9 @@ router.post("", (req: any, res: any) => {
     }
 })
 
+
 router.delete("/", (req: any, res: any) => {
+    reqInfo(req)
     try {
         const { imageUrl } = req.body;
         if (!imageUrl) return res.status(400).json(new apiResponse(400, "Image URL is required", {}, {}));
@@ -32,11 +34,10 @@ router.delete("/", (req: any, res: any) => {
 
         if (!filename) return res.status(400).json(new apiResponse(400, "Invalid image URL", {}, {}));
 
-        const imagePath = path.join(process.cwd(), "images", filename);
-
+        const imagePath = path.join(process.cwd(), "uploads", filename);
         if (!fs.existsSync(imagePath)) return res.status(404).json(new apiResponse(404, "Image not found", {}, {}));
-
         fs.unlinkSync(imagePath);
+        console.log("Image path:", imagePath);
 
         return res.status(200).json(new apiResponse(200, "Image deleted successfully", {}, {}));
     } catch (error) {
