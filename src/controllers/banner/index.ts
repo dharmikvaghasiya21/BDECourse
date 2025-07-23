@@ -71,9 +71,9 @@ export const editBanner = async (req, res) => {
     const { id } = req.body;
     const updated = await bannerModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
     if (!updated) {
-      return res.status(404).json(new apiResponse(404, "Banner not found", null, null));
+      return res.status(404).json(new apiResponse(404, "Banner not found", {}, {}));
     }
-    return res.status(200).json(new apiResponse(200, "Banner updated", updated, null));
+    return res.status(200).json(new apiResponse(200, "Banner updated", updated, {}));
   } catch (error) {
     return res.status(500).json(
       new apiResponse(500, responseMessage?.internalServerError, {}, error)
@@ -87,10 +87,10 @@ export const deleteBanner = async (req, res) => {
     const { id } = req.params;
     const deleted = await bannerModel.findOneAndUpdate({ _id: new ObjectId(id) }, { isDeleted: true }, { new: true });
     if (!deleted) {
-      return res.status(404).json(new apiResponse(404, "Banner not found", null, null));
+      return res.status(404).json(new apiResponse(404, "Banner not found", {}, {}));
     }
 
-    return res.status(200).json(new apiResponse(200, "Banner soft-deleted", deleted, null));
+    return res.status(200).json(new apiResponse(200, "Banner soft-deleted", deleted, {}));
   } catch (error) {
     return res.status(500).json(
       new apiResponse(500, responseMessage?.internalServerError, {}, error)

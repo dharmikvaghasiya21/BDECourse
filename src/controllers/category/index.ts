@@ -25,7 +25,7 @@ export const editCategory = async (req, res) => {
         const body = req.body;
         const updated = await categoryModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
 
-        if (!updated) return res.status(404).json(new apiResponse(404, "Category not found", null, null));
+        if (!updated) return res.status(404).json(new apiResponse(404, "Category not found", {}, {}));
 
         return res.status(200).json(new apiResponse(200, "Category updated", updated, {}));
     } catch (error) {
@@ -38,7 +38,7 @@ export const deleteCategory = async (req, res) => {
     try {
         const { id } = req.params;
         const deleted = await categoryModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, { isDeleted: true }, { new: true });
-        if (!deleted) return res.status(404).json(new apiResponse(404, "Category not found", null, null));
+        if (!deleted) return res.status(404).json(new apiResponse(404, "Category not found", {}, {}));
 
         return res.status(200).json(new apiResponse(200, "Category deleted (soft)", {}, {}));
     } catch (error) {
@@ -85,7 +85,7 @@ export const getCategoryById = async (req, res) => {
     try {
         const { id } = req.params;
         const category = await categoryModel.findOne({ _id: new ObjectId(id), isDeleted: false });
-        if (!category) return res.status(404).json(new apiResponse(404, "Category not found", null, null));
+        if (!category) return res.status(404).json(new apiResponse(404, "Category not found", {}, {}));
         return res.status(200).json(new apiResponse(200, "Category fetched", category, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));

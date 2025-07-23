@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import { USER_ROLE } from "../../common";
+import { required } from "joi";
 
 const userSchema = new mongoose.Schema({
 
-    firstName: { type: String },
-    lastName: { type: String },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
 
     phoneNumber: { type: String, required: true },
