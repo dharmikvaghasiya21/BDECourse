@@ -6,7 +6,7 @@ const courseSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
     categoryType: { type: mongoose.Schema.Types.ObjectId, ref: "category" },
     feature: { type: Boolean, default: false },
-    action: { type: Boolean, default: true },
+    action: { type: Boolean, default: false },
     locked: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false }
 }, { timestamps: true, versionKey: false });

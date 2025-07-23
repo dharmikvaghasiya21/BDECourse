@@ -84,8 +84,9 @@ export const deleteCourse = async (req, res) => {
     try {
         const deleted = await courseModel.findOneAndUpdate({ _id: req.params.id }, { isDeleted: true });
         if (!deleted) return res.status(404).json(new apiResponse(404, "Course not found", null, null));
-        return res.status(200).json(new apiResponse(200, "Course deleted", null, null));
+        return res.status(200).json(new apiResponse(200, "Course deleted (soft delete)", null, null));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
+ 

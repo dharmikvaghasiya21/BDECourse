@@ -35,12 +35,10 @@ router.delete("/", (req: any, res: any) => {
         if (!filename) return res.status(400).json(new apiResponse(400, "Invalid image URL", {}, {}));
 
         const imagePath = path.join(process.cwd(), "uploads", filename);
-        console.log("Image URL:", imageUrl);
-
-        console.log("Image path:", imagePath);
+       
         if (!fs.existsSync(imagePath)) return res.status(404).json(new apiResponse(404, "Image not found", {}, {}));
         fs.unlinkSync(imagePath);
-
+        
         return res.status(200).json(new apiResponse(200, "Image deleted successfully", {}, {}));
     } catch (error) {
         console.log(error)

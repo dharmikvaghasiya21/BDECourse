@@ -11,43 +11,43 @@ export const addBanner = async (req, res) => {
   try {
     const body = req.body;
     const banner = await bannerModel.create(body);
-    return res.status(201).json(new apiResponse(201, "Banner section created", banner, null));
+    return res.status(200).json(new apiResponse(200, "Banner section created", banner, {}));
   } catch (error) {
     return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
   }
 };
 
 
-export const getAllBanner= async (req, res) => {
-    reqInfo(req);
-    try {
-        let { type, search, page, limit  } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
-        if (type) criteria.type = type;
-        if (search) {
-            criteria.title = { $regex: search, $options: 'si'};
-        }
-        const pageNum = parseInt(page) || 1;
-        const limitNum = parseInt(limit) || 1;
-
-        if (page && limit) {
-            options.skip = (parseInt(page) - 1) * parseInt(limit);
-            options.limit = parseInt(limit);
-        }
-
-        const response = await getData(bannerModel, criteria, {}, options);
-        const totalCount = await countData(bannerModel, criteria);
-
-        const stateObj = {
-            page: pageNum,
-            limit: limitNum,
-            page_limit: Math.ceil(totalCount / limitNum) || 1,
-        };
-
-        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('Banners'), { banner_data: response, totalData: totalCount, state: stateObj }, {}));
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
+export const getAllBanner = async (req, res) => {
+  reqInfo(req);
+  try {
+    let { type, search, page, limit } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
+    if (type) criteria.type = type;
+    if (search) {
+      criteria.title = { $regex: search, $options: 'si' };
     }
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 1;
+
+    if (page && limit) {
+      options.skip = (parseInt(page) - 1) * parseInt(limit);
+      options.limit = parseInt(limit);
+    }
+
+    const response = await getData(bannerModel, criteria, {}, options);
+    const totalCount = await countData(bannerModel, criteria);
+
+    const stateObj = {
+      page: pageNum,
+      limit: limitNum,
+      page_limit: Math.ceil(totalCount / limitNum) || 1,
+    };
+
+    return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('Banners'), { banner_data: response, totalData: totalCount, state: stateObj }, {}));
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
+  }
 };
 
 
