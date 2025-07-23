@@ -10,7 +10,7 @@ const router = Router();
 
 router.post("", (req: any, res: any) => {
     try {
-        let file = req.file
+        let file = req.file;
         if (!file) {
             return res.status(400).json(new apiResponse(400, "Image file is missing", {}, {}));
         }
