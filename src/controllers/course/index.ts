@@ -4,10 +4,13 @@ import { apiResponse } from "../../common";
 import { countData, getData, reqInfo, responseMessage } from "../../helper";
 import mongoose from "mongoose";
 
+let ObjectId = require("mongoose").Types.ObjectId;
+
 export const addCourse = async (req, res) => {
+    reqInfo(req);
     try {
         const body = req.body;
-        
+
         const user = req.user || req.headers.user;
         body.userId = user._id;
         const Course = await new courseModel(body).save();
@@ -51,7 +54,8 @@ export const getAllCourses = async (req, res) => {
 };
 
 
-export const getCourseById = async (req: Request, res: Response) => {
+export const getCourseById = async (req, res) => {
+    reqInfo(req);
     try {
         const course = await courseModel.findOne({ _id: req.params.id, isDeleted: false }).populate("categoryType");
         if (!course) return res.status(404).json(new apiResponse(404, "Course not found", null, null));
@@ -61,20 +65,13 @@ export const getCourseById = async (req: Request, res: Response) => {
     }
 };
 
-export const editCourse = async (req: Request, res: Response) => {
+export const editCourse = async (req, res) => {
+    reqInfo(req);
     try {
         const { id } = req.body;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) { return res.status(400).json(new apiResponse(400, "Invalid course ID", null, null)); }
-
-        const { name, feature, categoryType, action } = req.body;
-        const updateData: any = { name, feature, categorytype: categoryType, action, };
-
-        if (req.file) { updateData.image = `/uploads/${req.file.filename}`; }
-        const updated = await courseModel.findOneAndUpdate({ _id: id }, updateData, { new: true });
-
+        const body = req.body;
+        const updated = await courseModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
         if (!updated) { return res.status(404).json(new apiResponse(404, "Course not found", null, null)); }
-
         return res.status(200).json(new apiResponse(200, "Course updated", updated, null));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
@@ -82,7 +79,8 @@ export const editCourse = async (req: Request, res: Response) => {
 };
 
 
-export const deleteCourse = async (req: Request, res: Response) => {
+export const deleteCourse = async (req, res) => {
+    reqInfo(req);
     try {
         const deleted = await courseModel.findOneAndUpdate({ _id: req.params.id }, { isDeleted: true });
         if (!deleted) return res.status(404).json(new apiResponse(404, "Course not found", null, null));

@@ -5,6 +5,7 @@ import { countData, getData, reqInfo, responseMessage } from "../../helper";
 let ObjectId = require("mongoose").Types.ObjectId;
 
 export const addCategory = async (req, res) => {
+    reqInfo(req);
     try {
         const body = req.body;
         const user = req.user || req.headers.user;
@@ -18,6 +19,7 @@ export const addCategory = async (req, res) => {
 };
 
 export const editCategory = async (req, res) => {
+    reqInfo(req);
     try {
         const { id } = req.body;
         const body = req.body;
@@ -32,6 +34,7 @@ export const editCategory = async (req, res) => {
 };
 
 export const deleteCategory = async (req, res) => {
+    reqInfo(req);
     try {
         const { id } = req.params;
         const deleted = await categoryModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, { isDeleted: true }, { new: true });
@@ -78,6 +81,7 @@ export const getAllCategories = async (req, res) => {
 
 
 export const getCategoryById = async (req, res) => {
+    reqInfo(req);
     try {
         const { id } = req.params;
         const category = await categoryModel.findOne({ _id: new ObjectId(id), isDeleted: false });
