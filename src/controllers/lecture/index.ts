@@ -1,5 +1,5 @@
-import { apiResponse, USER_ROLE } from "../../common";
-import { categoryModel, lectureModel } from "../../database";
+import { apiResponse } from "../../common";
+import {  lectureModel } from "../../database";
 import { countData, getData, reqInfo, responseMessage } from "../../helper";
 
 let ObjectId = require("mongoose").Types.ObjectId;
@@ -71,14 +71,13 @@ export const getAllLectures = async (req, res) => {
             page_limit: Math.ceil(totalCount / limitNum) || 1,
         };
 
-        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('Categories fetched'),
-            { category_data: response, totalData: totalCount, state: stateObj }, {}));
+        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('lectures fetched'),
+            { lecture_data: response, totalData: totalCount, state: stateObj }, {}));
     } catch (error) {
         console.log(error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
-
 
 
 export const getLectureById = async (req, res) => {

@@ -47,8 +47,8 @@ export const getAllCourses = async (req, res) => {
             page_limit: Math.ceil(totalCount / limitNum) || 1,
         };
 
-        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('Categories fetched'),
-            { category_data: response, totalData: totalCount, state: stateObj }, {}));
+        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('courses fetched'),
+            { course_data: response, totalData: totalCount, state: stateObj }, {}));
     } catch (error) {
         console.log(error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
@@ -59,7 +59,7 @@ export const getAllCourses = async (req, res) => {
 export const getCourseById = async (req, res) => {
     reqInfo(req);
     try {
-        const course = await courseModel.findOne({ _id: req.params.id, isDeleted: false }).populate("categoryType");
+        const course = await courseModel.findOne({ _id: req.params.id, isDeleted: false }).populate("courseType");
         if (!course) return res.status(404).json(new apiResponse(404, "Course not found", {}, {}));
         return res.status(200).json(new apiResponse(200, "Course fetched", course, {}));
     } catch (error) {
