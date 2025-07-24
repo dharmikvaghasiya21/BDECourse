@@ -59,7 +59,8 @@ export const getAllCourses = async (req, res) => {
 export const getCourseById = async (req, res) => {
     reqInfo(req);
     try {
-        const course = await courseModel.findOne({ _id: req.params.id, isDeleted: false }).populate("courseType");
+        const { id } = req.params;
+        const course = await courseModel.findOne({ _id: new ObjectId(id), isDeleted: false });
         if (!course) return res.status(404).json(new apiResponse(404, "Course not found", {}, {}));
         return res.status(200).json(new apiResponse(200, "Course fetched", course, {}));
     } catch (error) {

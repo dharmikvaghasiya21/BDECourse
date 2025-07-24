@@ -5,7 +5,6 @@ import { addEditAboutUsSchema } from "../../validation/about-us";
 
 export const add_edit_about_us = async (req, res) => {
     reqInfo(req)
-    // let { user } = req.headers
     try {
         const { error, value } = addEditAboutUsSchema.validate(req.body)
         if (error) return res.status(501).json(new apiResponse(501, error?.details[0]?.message, {}, {}))
