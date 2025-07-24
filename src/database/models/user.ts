@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { USER_ROLE } from "../../common";
 import { required } from "joi";
 
-const userSchema = new mongoose.Schema({
+const studentsSchema = new mongoose.Schema({
 
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -21,4 +21,4 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: Object.values(USER_ROLE), default: 'user' },
 }, { timestamps: true, versionKey: false });
 
-export const userModel = mongoose.model("user", userSchema);
+export const studentsModel = mongoose.model("students", studentsSchema);

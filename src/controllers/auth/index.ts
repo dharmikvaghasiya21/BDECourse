@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import bcryptjs from "bcryptjs";
 import { ADMIN_ROLES, apiResponse } from "../../common";
 import { reqInfo, responseMessage, sendEmail } from "../../helper";
-import { userModel } from "../../database/models";
+import { studentsModel } from "../../database/models";
 import jwt from "jsonwebtoken";
 
 
@@ -15,12 +15,12 @@ export const signUp = async (req: Request, res: Response) => {
     reqInfo(req)
   try {
     const body = req.body;
-    let existingUser = await userModel.findOne({ email: body?.email, isDeleted: false });
+    let existingUser = await studentsModel.findOne({ email: body?.email, isDeleted: false });
 
     if (existingUser)
       return res.status(409).json(new apiResponse(409, responseMessage?.alreadyEmail || "Email already exists", {}, {}));
 
-    existingUser = await userModel.findOne({ phoneNumber: body?.phoneNumber, isDeleted: false });
+    existingUser = await studentsModel.findOne({ phoneNumber: body?.phoneNumber, isDeleted: false });
     if (existingUser)
       return res.status(409).json(new apiResponse(409, "Phone number already exists", {}, {}));
 
@@ -33,7 +33,7 @@ export const signUp = async (req: Request, res: Response) => {
     body.password = hashedPassword;
     body.userType = ADMIN_ROLES.ADMIN
 
-    const savedUser = await new userModel(body).save();
+    const savedUser = await new studentsModel(body).save();
     if (!savedUser)
       return res.status(500).json(new apiResponse(500, responseMessage?.errorMail || "Error saving user", {}, {}));
 
@@ -49,7 +49,7 @@ export const login = async (req: Request, res: Response) => {
     reqInfo(req)
       try {
     const { email, password } = req.body;
-    const user = await userModel.findOne({ email, isDeleted: false }).lean();
+    const user = await studentsModel.findOne({ email, isDeleted: false }).lean();
     if (!user) {
       return res.status(400).json(new apiResponse(400, "Invalid email or password", {}, {}));
     }
@@ -93,7 +93,7 @@ export const forgot_password = async (req, res) => {
 reqInfo(req)
   try {
     body.isActive = true;
-    const user = await userModel.findOne({
+    const user = await studentsModel.findOne({
       email: body.email,
       isDeleted: false
     });
@@ -104,12 +104,12 @@ reqInfo(req)
 
     while (otpFlag === 1) {
       otp = Math.floor(100000 + Math.random() * 900000);
-      const isUsed = await userModel.findOne({ otp });
+      const isUsed = await studentsModel.findOne({ otp });
       if (!isUsed) otpFlag = 0;
     }
 
     const otpExpireTime = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
-    await userModel.findOneAndUpdate(user._id, { otp, otpExpireTime });
+    await studentsModel.findOneAndUpdate(user._id, { otp, otpExpireTime });
 
     await sendEmail(user.email, "Password Reset OTP", `Your OTP is: ${otp}`);
 
@@ -126,7 +126,7 @@ export const verify_otp = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    const user = await userModel.findOne({ email, isDeleted: false });
+    const user = await studentsModel.findOne({ email, isDeleted: false });
     if (!user || user.otp !== Number(otp)) {
       return res.status(400).json(new apiResponse(400, responseMessage?.invalidOTP, {}, {}));
     }
@@ -146,7 +146,7 @@ export const reset_password = async (req, res) => {
   try {
     const { email, newPassword } = req.body;
 
-    const user = await userModel.findOne({ email, isDeleted: false });
+    const user = await studentsModel.findOne({ email, isDeleted: false });
 
     if (!user) {
       return res.status(400).json(new apiResponse(400, "Email not found", {}, {}));
@@ -158,7 +158,7 @@ export const reset_password = async (req, res) => {
 
     const hashedPassword = await bcryptjs.hash(newPassword, 10);
 
-    await userModel.findByIdAndUpdate(user._id, {
+    await studentsModel.findByIdAndUpdate(user._id, {
       password: hashedPassword,
       confirmPassword: newPassword,
       otp: null,
@@ -196,7 +196,7 @@ export const change_password = async (req, res) => {
   try {
     const { email, oldPassword, newPassword, confirmPassword } = req.body;
 
-    const user = await userModel.findOne({ email });
+    const user = await studentsModel.findOne({ email });
     if (!user) {
       return res.status(404).json({ success: false, message: "Email not found." });
     }
