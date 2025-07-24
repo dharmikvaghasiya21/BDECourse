@@ -10,6 +10,7 @@ import { termsConditionRoutes } from './terms-condition'
 import { blogRoutes } from './blog'
 import { faqRoutes } from './faq'
 import { uploadRoutes } from './upload'
+import { lectureRouter } from './lecture'
 import { adminJWT } from '../helper/jwt'
 
 const router = Router()
@@ -26,7 +27,7 @@ router.use('/user', userRouter);
 router.use('/course', courseRouter);
 router.use('/upload',uploadRoutes);
 router.use('/category', categoryRouter);
-// router.use('/lecture', lectureRouter);
+router.use('/lecture', lectureRouter);
 router.use('/blog', blogRoutes);
 router.use('/faq', faqRoutes);
 

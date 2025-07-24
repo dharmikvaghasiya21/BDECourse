@@ -11,3 +11,4 @@ const bannerSchema = new mongoose.Schema({
 }, { timestamps: true, versionKey: false });
 
 export const bannerModel = mongoose.model("banner", bannerSchema);
+   

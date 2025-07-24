@@ -1,53 +1,52 @@
 import { apiResponse, USER_ROLE } from "../../common";
-import { categoryModel } from "../../database";
+import { categoryModel, lectureModel } from "../../database";
 import { countData, getData, reqInfo, responseMessage } from "../../helper";
 
 let ObjectId = require("mongoose").Types.ObjectId;
 
-export const addCategory = async (req, res) => {
+export const addLecture = async (req, res) => {
     reqInfo(req);
     try {
         const body = req.body;
-
         const user = req.user || req.headers.user;
         body.userId = user._id;
 
-        const category = await new categoryModel(body).save();
-        return res.status(200).json(new apiResponse(200, "Category created", category, {}));
+        const lecture = await new lectureModel(body).save();
+        return res.status(200).json(new apiResponse(200, "Lecture created", lecture, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
 
-export const editCategory = async (req, res) => {
+export const editLecture = async (req, res) => {
     reqInfo(req);
     try {
         const { id } = req.body;
         const body = req.body;
-        const updated = await categoryModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
+        const updated = await lectureModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
 
-        if (!updated) return res.status(404).json(new apiResponse(404, "Category not found", {}, {}));
+        if (!updated) return res.status(404).json(new apiResponse(404, "Lecture not found", {}, {}));
 
-        return res.status(200).json(new apiResponse(200, "Category updated", updated, {}));
+        return res.status(200).json(new apiResponse(200, "Lecture updated", updated, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
 
-export const deleteCategory = async (req, res) => {
+export const deleteLecture = async (req, res) => {
     reqInfo(req);
     try {
         const { id } = req.params;
-        const deleted = await categoryModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, { isDeleted: true }, { new: true });
-        if (!deleted) return res.status(404).json(new apiResponse(404, "Category not found", {}, {}));
+        const deleted = await lectureModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, { isDeleted: true }, { new: true });
+        if (!deleted) return res.status(404).json(new apiResponse(404, "Lecture not found", {}, {}));
 
-        return res.status(200).json(new apiResponse(200, "Category deleted (soft)", {}, {}));
+        return res.status(200).json(new apiResponse(200, "Lecture deleted (soft)", {}, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
 
-export const getAllCategories = async (req, res) => {
+export const getAllLectures = async (req, res) => {
     reqInfo(req);
     try {
         let { type, search, page, limit } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
@@ -63,8 +62,8 @@ export const getAllCategories = async (req, res) => {
             options.skip = (parseInt(page) - 1) * parseInt(limit);
             options.limit = parseInt(limit);
         }
-        const response = await getData(categoryModel, criteria, {}, options);
-        const totalCount = await countData(categoryModel, criteria);
+        const response = await getData(lectureModel, criteria, {}, options);
+        const totalCount = await countData(lectureModel, criteria);
 
         const stateObj = {
             page: pageNum,
@@ -82,13 +81,13 @@ export const getAllCategories = async (req, res) => {
 
 
 
-export const getCategoryById = async (req, res) => {
+export const getLectureById = async (req, res) => {
     reqInfo(req);
     try {
         const { id } = req.params;
-        const category = await categoryModel.findOne({ _id: new ObjectId(id), isDeleted: false });
-        if (!category) return res.status(404).json(new apiResponse(404, "Category not found", {}, {}));
-        return res.status(200).json(new apiResponse(200, "Category fetched", category, {}));
+        const lecture = await lectureModel.findOne({ _id: new ObjectId(id), isDeleted: false });
+        if (!lecture) return res.status(404).json(new apiResponse(404, "Lecture not found", {}, {}));
+        return res.status(200).json(new apiResponse(200, "Lecture fetched", lecture, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }

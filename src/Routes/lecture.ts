@@ -3,7 +3,13 @@ import { lectureController } from "../controllers";
 
 const router = express.Router();
 
-// Admin routes
-// router.post('/add', lectureController.add_lecture)
+// Admin 
+router.post('/add', lectureController.addLecture);
+router.post('/edit', lectureController.editLecture);
+router.delete('/:id', lectureController.deleteLecture);
 
-export const lectureRoutes = router;
+// Users
+router.get('/', lectureController.getAllLectures);
+router.get('/:id', lectureController.getLectureById);
+
+export const lectureRouter = router; 
