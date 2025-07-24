@@ -37,49 +37,54 @@ export const add_user = async (req, res) => {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
-
-
 export const edit_user_by_id = async (req, res) => {
-    reqInfo(req)
+    reqInfo(req);
     try {
-        const body = req.body;
+        const { userId, email, phoneNumber, password, confirmPassword } = req.body;
+        const oldPassword = req.body.oldPassword || req.body.oldpassword;
 
-        let role = await userModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false });
+        const user = await userModel.findOne({ _id: new ObjectId(userId), isDeleted: false });
+        if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
+        if (!oldPassword) return res.status(400).json(new apiResponse(400, "Old password is required", {}, {}));
+        if (!await bcrypt.compare(oldPassword, user.password))
+            return res.status(401).json(new apiResponse(401, "Old password is incorrect", {}, {}));
 
-        let isExist = await userModel.findOne({ email: body?.email, roleId: new ObjectId(role?._id), isDeleted: false, _id: { $ne: new ObjectId(body?.userId) } })
-        if (isExist) return res.status(404).json(new apiResponse(404, responseMessage?.dataAlreadyExist("email"), {}, {}))
+        const role = await userModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false });
+        const roleId = new ObjectId(role?._id);
 
-        isExist = await userModel.findOne({ phoneNumber: body?.phoneNumber, roleId: new ObjectId(role?._id), isDeleted: false, _id: { $ne: new ObjectId(body?.userId) } })
-        if (isExist) return res.status(404).json(new apiResponse(404, responseMessage?.dataAlreadyExist("phoneNumber"), {}, {}))
+        const emailExist = await userModel.findOne({ email, roleId, isDeleted: false, _id: { $ne: user._id } });
+        if (emailExist) return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("email"), {}, {}));
 
-        if (body.password !== body.confirmPassword) {
-            return res.status(400).json(new apiResponse(400, "Password and confirm password do not match", {}, {}));
+        const phoneExist = await userModel.findOne({ phoneNumber, roleId, isDeleted: false, _id: { $ne: user._id } });
+        if (phoneExist) return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("phoneNumber"), {}, {}));
+
+        if (password || confirmPassword) {
+            if (password !== confirmPassword)
+                return res.status(400).json(new apiResponse(400, "Password and confirm password do not match", {}, {}));
+            req.body.password = await bcrypt.hash(password, 10);
         }
 
-        if (body?.password) {
-            let password = await bcrypt.hash(body?.password, 10)
-            body.password = password
-        }
-        body.roleId = new ObjectId(role?._id)
-        let response = await userModel.findOneAndUpdate({ _id: new ObjectId(body?.userId) }, body, { new: true })
-        if (!response) return res.status(404).json(new apiResponse(404, responseMessage?.addDataError, {}, {}))
+        req.body.roleId = roleId;
 
-        return res.status(200).json(new apiResponse(200, responseMessage?.addDataSuccess("user"), response, {}))
+        const updatedUser = await userModel.findOneAndUpdate({ _id: user._id }, req.body, { new: true });
+        if (!updatedUser) return res.status(404).json(new apiResponse(404, responseMessage.addDataError, {}, {}));
+
+        return res.status(200).json(new apiResponse(200, responseMessage.addDataSuccess("user"), updatedUser, {}));
     } catch (error) {
-        console.log(error);
-        return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError, {}, {}))
+        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, {}));
     }
-}
+};
 
 
 export const get_all_users = async (req, res) => {
-    reqInfo(req)
-    let { page, limit, search } = req.query, criteria: any = {}, options: any = { lean: true }, { user } = req.headers
-    try {
+    reqInfo(req);
+    let { page, limit, search } = req.query, criteria: any = {}, options: any = { lean: true }, { user } = req.headers;
 
+    try {
         if (user?.roleId?.name === ADMIN_ROLES.USER) {
-            criteria._id = new ObjectId(user?._id)
+            criteria._id = new ObjectId(user?._id);
         }
+
         if (search) {
             criteria.$or = [
                 { firstName: { $regex: search, $options: 'si' } },
@@ -89,11 +94,13 @@ export const get_all_users = async (req, res) => {
             ];
         }
 
+        criteria.isDeleted = false;
         options.sort = { createdAt: -1 };
-        criteria.isDeleted = false
 
-        let role = await userModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false }).lean()
-        criteria.roleId = new ObjectId(role?._id)
+        const role = await userModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false }).lean();
+        if (role?._id) {
+            criteria.roleId = new ObjectId(role._id);
+        }
 
         if (page && limit) {
             options.skip = (parseInt(page) - 1) * parseInt(limit);
@@ -116,8 +123,44 @@ export const get_all_users = async (req, res) => {
         }, {}));
     } catch (error) {
         console.log(error);
-        return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError, {}, {}))
+        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, {}));
     }
-}
+};
 
 
+export const get_user_by_id = async (req, res) => {
+    reqInfo(req);
+    try {
+        const { id } = req.params;
+        if (!id) return res.status(400).json(new apiResponse(400, "User ID required", {}, {}));
+
+        const user = await userModel.findOne({ _id: new ObjectId(id), isDeleted: false }).lean();
+        if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
+
+        return res.status(200).json(new apiResponse(200, "User fetched successfully", user, {}));
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
+    }
+};
+
+
+export const delete_user_by_id = async (req, res) => {
+    reqInfo(req);
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json(new apiResponse(400, "User ID required", {}, {}));
+
+        const user = await userModel.findOneAndUpdate(
+            { _id: new ObjectId(userId), isDeleted: false },
+            { isDeleted: true },
+            { new: true }
+        );
+        if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
+
+        return res.status(200).json(new apiResponse(200, "User deleted successfully", user, {}));
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
+    }
+};
