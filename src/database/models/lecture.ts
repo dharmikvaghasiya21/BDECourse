@@ -1,7 +1,7 @@
 import { required } from "joi";
 import mongoose from "mongoose";
 
-const courseSchema = new mongoose.Schema({
+const lectureSchema = new mongoose.Schema({
     title: { type: String },
     thumbnail: { type: String },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
@@ -10,4 +10,4 @@ const courseSchema = new mongoose.Schema({
     isDeleted: { type: Boolean, default: false }
 }, { timestamps: true, versionKey: false });
 
-export const courseModel = mongoose.model("course", courseSchema);
+export const lectureModel = mongoose.model("lecture", lectureSchema);

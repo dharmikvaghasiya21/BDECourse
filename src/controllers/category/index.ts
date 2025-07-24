@@ -8,6 +8,7 @@ export const addCategory = async (req, res) => {
     reqInfo(req);
     try {
         const body = req.body;
+
         const user = req.user || req.headers.user;
         body.userId = user._id;
 
@@ -56,6 +57,8 @@ export const getAllCategories = async (req, res) => {
         }
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 1;
+        options.sort = { createdAt: -1 };;
+
 
         if (page && limit) {
             options.skip = (parseInt(page) - 1) * parseInt(limit);

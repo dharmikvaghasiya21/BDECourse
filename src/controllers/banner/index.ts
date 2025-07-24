@@ -28,6 +28,7 @@ export const getAllBanner = async (req, res) => {
     }
     const pageNum = parseInt(page) || 1;
     const limitNum = parseInt(limit) || 1;
+    options.sort = { createdAt: -1 };;
 
     if (page && limit) {
       options.skip = (parseInt(page) - 1) * parseInt(limit);

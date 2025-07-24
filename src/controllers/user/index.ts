@@ -1,3 +1,4 @@
+import { IdentityStore } from 'aws-sdk';
 import { ADMIN_ROLES, USER_ROLE, apiResponse } from '../../common';
 import { userModel } from '../../database';
 import { countData, getData, reqInfo, responseMessage } from '../../helper';
@@ -148,11 +149,11 @@ export const get_user_by_id = async (req, res) => {
 export const delete_user_by_id = async (req, res) => {
     reqInfo(req);
     try {
-        const { userId } = req.body;
-        if (!userId) return res.status(400).json(new apiResponse(400, "User ID required", {}, {}));
+        const { id } = req.params;
+        if (!id) return res.status(400).json(new apiResponse(400, "User ID required", {}, {}));
 
         const user = await userModel.findOneAndUpdate(
-            { _id: new ObjectId(userId), isDeleted: false },
+            { _id: new ObjectId(id), isDeleted: false },
             { isDeleted: true },
             { new: true }
         );

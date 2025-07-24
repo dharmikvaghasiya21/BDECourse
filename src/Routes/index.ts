@@ -26,6 +26,7 @@ router.use('/user', userRouter);
 router.use('/course', courseRouter);
 router.use('/upload',uploadRoutes);
 router.use('/category', categoryRouter);
+// router.use('/lecture', lectureRouter);
 router.use('/blog', blogRoutes);
 router.use('/faq', faqRoutes);
 

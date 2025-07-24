@@ -35,6 +35,8 @@ export const getAllCourses = async (req, res) => {
         if (page && limit) {
             options.skip = (parseInt(page) - 1) * parseInt(limit);
             options.limit = parseInt(limit);
+            options.sort = { createdAt: -1 };;
+
         }
         const response = await getData(courseModel, criteria, {}, options);
         const totalCount = await countData(courseModel, criteria);

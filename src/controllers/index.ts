@@ -8,3 +8,4 @@ export * as privacyPolicyController from "./privacy-policy";
 export * as termsConditionController from "./terms-condition";
 export * as blogController from "./blog";
 export * as userController from "./user";
+export * as lectureController from "./user";
