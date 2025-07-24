@@ -11,6 +11,7 @@ import { blogRoutes } from './blog'
 import { faqRoutes } from './faq'
 import { uploadRoutes } from './upload'
 import { lectureRouter } from './lecture'
+// import { chatRouter } from './chat'
 import { adminJWT } from '../helper/jwt'
 
 const router = Router()
@@ -27,6 +28,7 @@ router.use('/category', categoryRouter);
 router.use('/lecture', lectureRouter);
 router.use('/blog', blogRoutes);
 router.use('/faq', faqRoutes);
+// router.use('/chat', chatRouter);
 
 router.use(adminJWT);
 router.use('/upload',uploadRoutes);

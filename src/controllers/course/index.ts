@@ -21,7 +21,6 @@ export const addCourse = async (req, res) => {
     }
 };
 
-
 export const getAllCourses = async (req, res) => {
     reqInfo(req);
     try {
