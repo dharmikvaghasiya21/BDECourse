@@ -7,5 +7,5 @@ export * as faqController from "./faq";
 export * as privacyPolicyController from "./privacy-policy";
 export * as termsConditionController from "./terms-condition";
 export * as blogController from "./blog";
-export * as studentsController from "./students";
+export * as userController from "./user";
 export * as lectureController from "./lecture";

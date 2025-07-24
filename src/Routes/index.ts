@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import authRouter from './auth'
-import userRouter from './students'
+import userRouter from './user'
 import bannerRouter from './banner'
 import categoryRouter from './category' 
 import courseRouter from './course'
@@ -16,7 +16,7 @@ import { adminJWT } from '../helper/jwt'
 const router = Router()
 // admin 
 router.use('/auth', authRouter);
-router.use('/students', userRouter);
+router.use('/user', userRouter);
 router.use('/banner', bannerRouter);
 router.use('/about-us', aboutUsRoutes);
 router.use('/privacy-policy', privacyPolicyRoutes);

@@ -2,21 +2,21 @@ import jwt from 'jsonwebtoken'
 import { apiResponse } from '../common'
 import { Request, Response } from 'express'
 import { config } from '../../config'
-import { studentsModel } from '../database'
+import { userModel } from '../database'
 import { responseMessage } from './responce'
 
 const ObjectId = require('mongoose').Types.ObjectId
 const jwt_token_secret = config.JWT_TOKEN_SECRET;
 
-export const adminJWT = async (req: Request, res: Response, next) => {
+export const adminJWT = async (req , res, next) => {
     let { authorization } = req.headers,
         result: any
         // console.log("authorization===========",authorization)
     if (authorization) {
         try {
             let isVerifyToken = jwt.verify(authorization, jwt_token_secret)
-            result = await studentsModel.findOne({ _id: new ObjectId(isVerifyToken._id), isDeleted: false }).lean()
-
+            result = await userModel.findOne({ _id: new ObjectId(isVerifyToken._id), isDeleted: false }).lean()
+            
             if (result?.isBlocked == true) return res.status(410).json(new apiResponse(410, responseMessage?.accountBlock, {}, {}));
             if (result?.isDeleted == false) {
                 req.headers.user = result

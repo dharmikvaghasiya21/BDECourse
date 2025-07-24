@@ -1,21 +1,22 @@
 import { IdentityStore } from 'aws-sdk';
 import { ADMIN_ROLES, USER_ROLE, apiResponse } from '../../common';
-import { studentsModel } from '../../database';
+import { userModel } from '../../database';
 import { countData, getData, reqInfo, responseMessage } from '../../helper';
 import bcrypt from 'bcryptjs';
+import c from 'config';
 
 let ObjectId = require("mongoose").Types.ObjectId;
 
 
-export const add_students = async (req, res) => {
+export const add_user = async (req, res) => {
     reqInfo(req);
     try {
         const body = req.body;
-        const existingEmail = await studentsModel.findOne({ email: body.email, isDeleted: false });
+        const existingEmail = await userModel.findOne({ email: body.email, isDeleted: false });
 
         if (existingEmail)
             return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("email"), {}, {}));
-        const existingPhone = await studentsModel.findOne({ phoneNumber: body.phoneNumber, isDeleted: false });
+        const existingPhone = await userModel.findOne({ phoneNumber: body.phoneNumber, isDeleted: false });
 
         if (existingPhone)
             return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("phoneNumber"), {}, {}));
@@ -28,35 +29,40 @@ export const add_students = async (req, res) => {
         body.password = hashedPassword;
         body.role = USER_ROLE.USER;
 
-        const students = await new studentsModel(body).save();
-        if (!students)
+        const user = await new userModel(body).save();
+        if (!user)
             return res.status(500).json(new apiResponse(500, responseMessage.addDataError, {}, {}));
 
-        return res.status(200).json(new apiResponse(200, responseMessage.addDataSuccess("students"), students, {}));
+        return res.status(200).json(new apiResponse(200, responseMessage.addDataSuccess("user"), user, {}));
     } catch (error) {
-        console.error("Add students Error:", error);
+        console.error("Add User Error:", error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
-export const edit_students_by_id = async (req, res) => {
+export const edit_user_by_id = async (req, res) => {
     reqInfo(req);
+    console.log("Editing user with body:", req.body);
     try {
-        const { studentsId, email, phoneNumber, password, confirmPassword } = req.body;
+        const { userId, email, phoneNumber, password, confirmPassword } = req.body;
         const oldPassword = req.body.oldPassword || req.body.oldpassword;
-
-        const students = await studentsModel.findOne({ _id: new ObjectId(studentsId), isDeleted: false });
-        if (!students) return res.status(404).json(new apiResponse(404, "students not found", {}, {}));
+        console.log("Old password:", oldPassword);
+        const user = await userModel.findOne({ _id: new ObjectId(userId), isDeleted: false });
+        console.log("Found user:", user);
+        if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
         if (!oldPassword) return res.status(400).json(new apiResponse(400, "Old password is required", {}, {}));
-        if (!await bcrypt.compare(oldPassword, students.password))
+        if (!await bcrypt.compare(oldPassword, user.password))
             return res.status(401).json(new apiResponse(401, "Old password is incorrect", {}, {}));
+        console.log("Found roooooo:", USER_ROLE.USER);
 
-        const role = await studentsModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false });
+        // const role = await userModel.findOne({ name: USER_ROLE.USER, isDeleted: false });
+        const role = await userModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false });
+        console.log("Found role:", role);
         const roleId = new ObjectId(role?._id);
-
-        const emailExist = await studentsModel.findOne({ email, roleId, isDeleted: false, _id: { $ne: students._id } });
+        console.log("Role ID:", roleId);
+        const emailExist = await userModel.findOne({ email, roleId, isDeleted: false, _id: { $ne: user._id } });
         if (emailExist) return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("email"), {}, {}));
 
-        const phoneExist = await studentsModel.findOne({ phoneNumber, roleId, isDeleted: false, _id: { $ne: students._id } });
+        const phoneExist = await userModel.findOne({ phoneNumber, roleId, isDeleted: false, _id: { $ne: user._id } });
         if (phoneExist) return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("phoneNumber"), {}, {}));
 
         if (password || confirmPassword) {
@@ -67,23 +73,25 @@ export const edit_students_by_id = async (req, res) => {
 
         req.body.roleId = roleId;
 
-        const updatedstudents = await studentsModel.findOneAndUpdate({ _id: students._id }, req.body, { new: true });
-        if (!updatedstudents) return res.status(404).json(new apiResponse(404, responseMessage.addDataError, {}, {}));
+        const updatedUser = await userModel.findOneAndUpdate({ _id: user._id }, req.body, { new: true });
+        if (!updatedUser) return res.status(404).json(new apiResponse(404, responseMessage.addDataError, {}, {}));
 
-        return res.status(200).json(new apiResponse(200, responseMessage.addDataSuccess("students"), updatedstudents, {}));
+        return res.status(200).json(new apiResponse(200, responseMessage.updateDataSuccess("user"), updatedUser, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, {}));
     }
 };
 
 
-export const get_all_students = async (req, res) => {
+export const get_all_users = async (req, res) => {
     reqInfo(req);
-    let { page, limit, search } = req.query, criteria: any = {}, options: any = { lean: true }, { students } = req.headers;
+    console.log("Fetching all users with query:", req.query);
+    
+    let { page, limit, search } = req.query, criteria: any = {}, options: any = { lean: true }, { user } = req.headers;
 
     try {
-        if (students?.roleId?.name === ADMIN_ROLES.USER) {
-            criteria._id = new ObjectId(students?._id);
+        if (user?.roleId?.name === ADMIN_ROLES.USER) {
+            criteria._id = new ObjectId(user?._id);
         }
 
         if (search) {
@@ -98,7 +106,7 @@ export const get_all_students = async (req, res) => {
         criteria.isDeleted = false;
         options.sort = { createdAt: -1 };
 
-        const role = await studentsModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false }).lean();
+        const role = await userModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false }).lean();
         if (role?._id) {
             criteria.roleId = new ObjectId(role._id);
         }
@@ -108,8 +116,8 @@ export const get_all_students = async (req, res) => {
             options.limit = parseInt(limit);
         }
 
-        const response = await getData(studentsModel, criteria, {}, options);
-        const totalCount = await countData(studentsModel, criteria);
+        const response = await getData(userModel, criteria, {}, options);
+        const totalCount = await countData(userModel, criteria);
 
         const stateObj = {
             page: parseInt(page) || 1,
@@ -117,8 +125,8 @@ export const get_all_students = async (req, res) => {
             page_limit: Math.ceil(totalCount / (parseInt(limit) || totalCount)) || 1,
         };
 
-        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('students'), {
-            students_data: response,
+        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('User'), {
+            user_data: response,
             totalData: totalCount,
             state: stateObj
         }, {}));
@@ -129,16 +137,16 @@ export const get_all_students = async (req, res) => {
 };
 
 
-export const get_students_by_id = async (req, res) => {
+export const get_user_by_id = async (req, res) => {
     reqInfo(req);
     try {
         const { id } = req.params;
-        if (!id) return res.status(400).json(new apiResponse(400, "students ID required", {}, {}));
+        if (!id) return res.status(400).json(new apiResponse(400, "User ID required", {}, {}));
 
-        const students = await studentsModel.findOne({ _id: new ObjectId(id), isDeleted: false }).lean();
-        if (!students) return res.status(404).json(new apiResponse(404, "students not found", {}, {}));
+        const user = await userModel.findOne({ _id: new ObjectId(id), isDeleted: false }).lean();
+        if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
 
-        return res.status(200).json(new apiResponse(200, "students fetched successfully", students, {}));
+        return res.status(200).json(new apiResponse(200, "User fetched successfully", user, {}));
     } catch (error) {
         console.log(error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
@@ -146,20 +154,20 @@ export const get_students_by_id = async (req, res) => {
 };
 
 
-export const delete_students_by_id = async (req, res) => {
+export const delete_user_by_id = async (req, res) => {
     reqInfo(req);
     try {
         const { id } = req.params;
-        if (!id) return res.status(400).json(new apiResponse(400, "students ID required", {}, {}));
+        if (!id) return res.status(400).json(new apiResponse(400, "User ID required", {}, {}));
 
-        const students = await studentsModel.findOneAndUpdate(
+        const user = await userModel.findOneAndUpdate(
             { _id: new ObjectId(id), isDeleted: false },
             { isDeleted: true },
             { new: true }
         );
-        if (!students) return res.status(404).json(new apiResponse(404, "students not found", {}, {}));
+        if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
 
-        return res.status(200).json(new apiResponse(200, "students deleted successfully", students, {}));
+        return res.status(200).json(new apiResponse(200, "User deleted successfully", user, {}));
     } catch (error) {
         console.log(error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
