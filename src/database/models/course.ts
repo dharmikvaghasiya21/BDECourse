@@ -9,7 +9,7 @@ const courseSchema = new mongoose.Schema({
 
     feature: { type: Boolean, default: false },
     action: { type: Boolean, default: false },
-    locked: { type: Boolean, default: false },
+    locked: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false }
 }, { timestamps: true, versionKey: false });
 

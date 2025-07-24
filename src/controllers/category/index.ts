@@ -8,10 +8,6 @@ export const addCategory = async (req, res) => {
     reqInfo(req);
     try {
         const body = req.body;
-
-        const user = req.user || req.headers.user;
-        body.userId = user._id;
-
         const category = await new categoryModel(body).save();
         return res.status(200).json(new apiResponse(200, "Category created", category, {}));
     } catch (error) {
