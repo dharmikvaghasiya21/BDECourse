@@ -56,7 +56,7 @@ export const getAllLectures = async (req, res) => {
             criteria.title = { $regex: search, $options: 'si' };
         }
 
-        // if (courseFilter) criteria.courseId =  new ObjectId(courseFilter);
+        if (courseFilter) criteria.courseId =  new ObjectId(courseFilter);
 
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 1;

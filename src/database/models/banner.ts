@@ -6,7 +6,7 @@ const bannerSchema = new mongoose.Schema({
     image: { type: String, required: true },
     youtubeLink: { type: String, required: true },
     action: { type: Boolean, default: false },
-    // priority: { type: Number, default: 0 },
+    priority: { type: Number, default: 0 },
     isDeleted: { type: Boolean, default: false },
 }, { timestamps: true, versionKey: false });
 

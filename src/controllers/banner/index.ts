@@ -10,10 +10,30 @@ export const addBanner = async (req, res) => {
   reqInfo(req)
   try {
     const body = req.body;
+    let isExist = await bannerModel.findOne({ type: body.type, priority: body.priority, isDeleted: false });
+    if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
     const banner = await bannerModel.create(body);
     return res.status(200).json(new apiResponse(200, "Banner section created", banner, {}));
   } catch (error) {
     return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
+  }
+};
+
+
+export const editBanner = async (req, res) => {
+  reqInfo(req)
+  try {
+    const body = req.body;
+    const { id } = req.body;
+    const updated = await bannerModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
+    if (!updated) {
+      return res.status(404).json(new apiResponse(404, "Banner not found", {}, {}));
+    }
+    return res.status(200).json(new apiResponse(200, "Banner updated", updated, {}));
+  } catch (error) {
+    return res.status(500).json(
+      new apiResponse(500, responseMessage?.internalServerError, {}, error)
+    );
   }
 };
 
@@ -65,22 +85,7 @@ export const getBannerById = async (req, res) => {
   }
 };
 
-export const editBanner = async (req, res) => {
-  reqInfo(req)
-  try {
-    const body = req.body;
-    const { id } = req.body;
-    const updated = await bannerModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
-    if (!updated) {
-      return res.status(404).json(new apiResponse(404, "Banner not found", {}, {}));
-    }
-    return res.status(200).json(new apiResponse(200, "Banner updated", updated, {}));
-  } catch (error) {
-    return res.status(500).json(
-      new apiResponse(500, responseMessage?.internalServerError, {}, error)
-    );
-  }
-};
+
 
 export const deleteBanner = async (req, res) => {
   reqInfo(req)
