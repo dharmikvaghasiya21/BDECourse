@@ -1,62 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <title>Socket.io Chat Tester</title>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-</head>
-<body>
-  <h2>Simple Chat Tester</h2>
-  <div>
-    <label>Your User ID:</label>
-    <input type="text" id="senderId" placeholder="Enter your User ID" />
-  </div>
-
-  <div>
-    <label>Receiver ID:</label>
-    <input type="text" id="receiverId" placeholder="Enter Receiver's ID" />
-  </div>
-
-  <div>
-    <label>Message:</label>
-    <input type="text" id="message" placeholder="Enter your message" />
-  </div>
-
-  <button onclick="connectSocket()">Connect</button>
-  <button onclick="sendMessage()">Send Message</button>
-
-  <h3>Received Messages:</h3>
-  <div id="messages" style="border:1px solid #ccc; padding:10px;"></div>
-
-  <script>
-    let socket;
-
-    function connectSocket() {
-      const senderId = document.getElementById("senderId").value;
-      socket = io("http://localhost:2222");
-
-      socket.on("connect", () => {
-        console.log("Connected to server:", socket.id);
-        socket.emit("join", senderId);
-      });
-
-      socket.on("receive_message", (data) => {
-        console.log("New message received:", data);
-        const messageDiv = document.getElementById("messages");
-        messageDiv.innerHTML += `<p><strong>${data.senderId}:</strong> ${data.message}</p>`;
-      });
+  <meta charset="UTF-8" />
+  <title>Chat API Tester</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
     }
 
-    function sendMessage() {
+    input,
+    textarea,
+    button {
+      margin: 5px 0;
+      padding: 8px;
+      width: 100%;
+    }
+
+    .section {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+
+    pre {
+      background: #f5f5f5;
+      padding: 10px;
+      overflow: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>🔧 Chat API Tester</h2>
+
+  <div class="section">
+    <h3>1️⃣ Get Chat Between Two Users</h3>
+    <input type="text" id="senderId" placeholder="Sender ID">
+    <input type="text" id="receiverId" placeholder="Receiver ID">
+    <button onclick="getChatBetweenUsers()">Fetch Chat</button>
+    <pre id="chatResult"></pre>
+  </div>
+
+  <div class="section">
+    <h3>2️⃣ Get All Chats</h3>
+    <button onclick="getAllChats()">Fetch All Chats</button>
+    <pre id="allChatsResult"></pre>
+  </div>
+
+  <div class="section">
+    <h3>3️⃣ Delete Chat by Chat ID</h3>
+    <input type="text" id="chatId" placeholder="Chat ID">
+    <button onclick="deleteChat()">Delete Chat</button>
+    <pre id="deleteResult"></pre>
+  </div>
+
+  <div class="section">
+    <h3>4️⃣ Block User</h3>
+    <input type="text" id="blockUserId" placeholder="User ID to Block">
+    <button onclick="blockUser()">Block</button>
+    <pre id="blockResult"></pre>
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:2222"; // 👈 Replace if needed
+
+    async function getChatBetweenUsers() {
       const senderId = document.getElementById("senderId").value;
       const receiverId = document.getElementById("receiverId").value;
-      const message = document.getElementById("message").value;
 
-      socket.emit("send_message", {
-        senderId,
-        receiverId,
-        message
+      const res = await fetch(`${API_BASE}/chat/get?senderId=${senderId}&receiverId=${receiverId}`);
+      const data = await res.json();
+      document.getElementById("chatResult").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function getAllChats() {
+      const res = await fetch(`${API_BASE}/chat/getall`);
+      const data = await res.json();
+      document.getElementById("allChatsResult").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function deleteChat() {
+      const chatId = document.getElementById("chatId").value;
+
+      const res = await fetch(`${API_BASE}/chat/delete`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId })
       });
+
+      const data = await res.json();
+      document.getElementById("deleteResult").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function blockUser() {
+      const userId = document.getElementById("blockUserId").value;
+
+      const res = await fetch(`${API_BASE}/chat/block`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId })
+      });
+
+      const data = await res.json();
+      document.getElementById("blockResult").textContent = JSON.stringify(data, null, 2);
     }
   </script>
 </body>

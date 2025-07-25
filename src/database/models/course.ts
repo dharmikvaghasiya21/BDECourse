@@ -4,8 +4,8 @@ const courseSchema = new mongoose.Schema({
     name: { type: String, required: true },
     image: { type: String, required: true },
 
-    userId: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
-    categoryType: [{ type: mongoose.Schema.Types.ObjectId, ref: "category" }],
+    userIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    categoryIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "category" }],
 
     feature: { type: Boolean, default: false },
     action: { type: Boolean, default: false },

@@ -10,6 +10,8 @@ import multer from "multer"
 import fs from 'fs';
 const app = express();
 
+
+
 app.use("/pdf", express.static(path.join(__dirname, "..", "..", "pdf")));
 app.use("/uploads", express.static(path.join(__dirname, "..", "..", "uploads")));
 

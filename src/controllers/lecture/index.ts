@@ -50,11 +50,14 @@ export const deleteLecture = async (req, res) => {
 export const getAllLectures = async (req, res) => {
     reqInfo(req);
     try {
-        let { type, search, page, limit } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
+        let { type, search, page, limit, courseFilter } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
         if (type) criteria.type = type;
         if (search) {
             criteria.title = { $regex: search, $options: 'si' };
         }
+
+        // if (courseFilter) criteria.courseId =  new ObjectId(courseFilter);
+
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 1;
         options.sort = { createdAt: -1 };;
