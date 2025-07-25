@@ -49,7 +49,7 @@ export const login = async (req: Request, res: Response) => {
     console.log("user===", user)
 
     const isMatch = await bcryptjs.compare(password, user.password);
-    console.log("ismatch===", isMatch)
+    console.log("isMatch===", isMatch)
     if (!isMatch) {
       return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));
     }
