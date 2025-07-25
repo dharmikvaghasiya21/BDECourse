@@ -4,6 +4,7 @@ import { userModel } from '../../database';
 import { countData, getData, reqInfo, responseMessage } from '../../helper';
 import bcrypt from 'bcryptjs';
 import c from 'config';
+import { roleModel } from '../../database/models/role';
 
 let ObjectId = require("mongoose").Types.ObjectId;
 
@@ -41,7 +42,7 @@ export const edit_user_by_id = async (req, res) => {
         const user = await userModel.findOne({ _id: new ObjectId(userId), isDeleted: false });
 
         if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
-      
+
 
         const role = await userModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false });
         const roleId = new ObjectId(role?._id);
@@ -62,18 +63,15 @@ export const edit_user_by_id = async (req, res) => {
     }
 };
 
-
 export const get_all_users = async (req, res) => {
     reqInfo(req);
     console.log("Fetching all users with query:", req.query);
 
-    let { page, limit, search } = req.query, criteria: any = {}, options: any = { lean: true }, { user } = req.headers;
+    let { page, limit, search } = req.query;
+    let criteria: any = { isDeleted: false };
+    let options: any = { lean: true, sort: { createdAt: -1 } };
 
     try {
-        if (user?.roleId?.name === ADMIN_ROLES.USER) {
-            criteria._id = new ObjectId(user?._id);
-        }
-
         if (search) {
             criteria.$or = [
                 { firstName: { $regex: search, $options: 'si' } },
@@ -82,14 +80,7 @@ export const get_all_users = async (req, res) => {
                 { phoneNumber: { $regex: search, $options: 'si' } }
             ];
         }
-
-        criteria.isDeleted = false;
-        options.sort = { createdAt: -1 };
-
-        const role = await userModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false }).lean();
-        if (role?._id) {
-            criteria.roleId = new ObjectId(role._id);
-        }
+        criteria.role = "user";
 
         if (page && limit) {
             options.skip = (parseInt(page) - 1) * parseInt(limit);
@@ -115,6 +106,7 @@ export const get_all_users = async (req, res) => {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, {}));
     }
 };
+
 
 
 export const get_user_by_id = async (req, res) => {
