@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_TOKEN_SECRET;
 
 // const TOKEN_EXPIRE = "1d";
 
-export const signUp = async (req: Request, res: Response) => {
+export const signUp = async (req , res) => {
   reqInfo(req)
   try {
     const body = req.body;
@@ -38,7 +38,7 @@ export const signUp = async (req: Request, res: Response) => {
 };
 
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req, res) => {
   reqInfo(req)
   try {
     const { email, password } = req.body;
@@ -200,7 +200,6 @@ export const change_password = async (req, res) => {
       return res.status(400).json({ success: false, message: "Old password is incorrect." });
     } 
 
-    // user.confirmPassword = confirmPassword;
     const hashedPassword = await bcryptjs.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();

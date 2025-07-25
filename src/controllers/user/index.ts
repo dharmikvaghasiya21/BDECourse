@@ -40,7 +40,7 @@ export const edit_user_by_id = async (req, res) => {
     reqInfo(req);
     console.log("Editing user with body:", req.body);
     try {
-        const { userId, email, phoneNumber, password, confirmPassword } = req.body;
+        const { userId, email, phoneNumber } = req.body;
         const user = await userModel.findOne({ _id: new ObjectId(userId), isDeleted: false });
 
         if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
