@@ -20,16 +20,10 @@ export const add_user = async (req, res) => {
 
         if (existingPhone)
             return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("phoneNumber"), {}, {}));
-        const hashedPassword = await bcrypt.hash(body.password, 10);
-
-        if (body.password !== body.confirmPassword) {
-            return res.status(400).json(new apiResponse(400, "Password and confirm password do not match", {}, {}));
-        }
-
-        body.password = hashedPassword;
         body.role = USER_ROLE.USER;
 
         const user = await new userModel(body).save();
+        console.log("User added successfully:", user);
         if (!user)
             return res.status(500).json(new apiResponse(500, responseMessage.addDataError, {}, {}));
 
@@ -44,32 +38,18 @@ export const edit_user_by_id = async (req, res) => {
     console.log("Editing user with body:", req.body);
     try {
         const { userId, email, phoneNumber, password, confirmPassword } = req.body;
-        const oldPassword = req.body.oldPassword || req.body.oldpassword;
-        console.log("Old password:", oldPassword);
         const user = await userModel.findOne({ _id: new ObjectId(userId), isDeleted: false });
-        console.log("Found user:", user);
-        if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
-        if (!oldPassword) return res.status(400).json(new apiResponse(400, "Old password is required", {}, {}));
-        if (!await bcrypt.compare(oldPassword, user.password))
-            return res.status(401).json(new apiResponse(401, "Old password is incorrect", {}, {}));
-        console.log("Found roooooo:", USER_ROLE.USER);
 
-        // const role = await userModel.findOne({ name: USER_ROLE.USER, isDeleted: false });
+        if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
+      
+
         const role = await userModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false });
-        console.log("Found role:", role);
         const roleId = new ObjectId(role?._id);
-        console.log("Role ID:", roleId);
         const emailExist = await userModel.findOne({ email, roleId, isDeleted: false, _id: { $ne: user._id } });
         if (emailExist) return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("email"), {}, {}));
 
         const phoneExist = await userModel.findOne({ phoneNumber, roleId, isDeleted: false, _id: { $ne: user._id } });
         if (phoneExist) return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("phoneNumber"), {}, {}));
-
-        if (password || confirmPassword) {
-            if (password !== confirmPassword)
-                return res.status(400).json(new apiResponse(400, "Password and confirm password do not match", {}, {}));
-            req.body.password = await bcrypt.hash(password, 10);
-        }
 
         req.body.roleId = roleId;
 
@@ -86,7 +66,7 @@ export const edit_user_by_id = async (req, res) => {
 export const get_all_users = async (req, res) => {
     reqInfo(req);
     console.log("Fetching all users with query:", req.query);
-    
+
     let { page, limit, search } = req.query, criteria: any = {}, options: any = { lean: true }, { user } = req.headers;
 
     try {

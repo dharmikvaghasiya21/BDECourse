@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_TOKEN_SECRET;
 // const TOKEN_EXPIRE = "1d";
 
 export const signUp = async (req: Request, res: Response) => {
-    reqInfo(req)
+  reqInfo(req)
   try {
     const body = req.body;
     let existingUser = await userModel.findOne({ email: body?.email, isDeleted: false });
@@ -24,13 +24,6 @@ export const signUp = async (req: Request, res: Response) => {
     if (existingUser)
       return res.status(409).json(new apiResponse(409, "Phone number already exists", {}, {}));
 
-    if (body.password !== body.confirmPassword) {
-      return res.status(400).json(new apiResponse(400, "Password and confirm password do not match", {}, {}));
-    }
-
-    const salt = bcryptjs.genSaltSync(10);
-    const hashedPassword = await bcryptjs.hash(body.password, salt);
-    body.password = hashedPassword;
     body.userType = ADMIN_ROLES.ADMIN
 
     const savedUser = await new userModel(body).save();
@@ -46,43 +39,45 @@ export const signUp = async (req: Request, res: Response) => {
 
 
 export const login = async (req: Request, res: Response) => {
-    reqInfo(req)
-      try {
+  reqInfo(req)
+  try {
     const { email, password } = req.body;
     const user = await userModel.findOne({ email, isDeleted: false }).lean();
     if (!user) {
       return res.status(400).json(new apiResponse(400, "Invalid email", {}, {}));
     }
+    console.log("user===", user)
 
     const isMatch = await bcryptjs.compare(password, user.password);
+    console.log("ismatch===", isMatch)
     if (!isMatch) {
-        return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));
-      }
-      const token = jwt.sign(
-        {
-          _id: user._id,
-          role: user.role
-
-        },
-        JWT_SECRET,
-        {}
-      );
-
-      const responseData = {
-        token,
-        user: {
-          _id: user._id,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          userType: user.role || "user"
-        }
-      };
-      console.log("res===", responseData)
-      return res.status(200).json(new apiResponse(200, "Login successful", responseData, {}));
-    } catch (error) {
-      return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError || "Internal server error", {}, error));
+      return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));
     }
-  };
+    const token = jwt.sign(
+      {
+        _id: user._id,
+        role: user.role
+
+      },
+      JWT_SECRET,
+      {}
+    );
+
+    const responseData = {
+      token,
+      user: {
+        _id: user._id,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        userType: user.role || "user"
+      }
+    };
+    console.log("responce===", responseData)
+    return res.status(200).json(new apiResponse(200, "Login successful", responseData, {}));
+  } catch (error) {
+    return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError || "Internal server error", {}, error));
+  }
+};
 
 
 
@@ -90,7 +85,7 @@ export const forgot_password = async (req, res) => {
   let body = req.body,
     otpFlag = 1,
     otp = 0;
-reqInfo(req)
+  reqInfo(req)
   try {
     body.isActive = true;
     const user = await userModel.findOne({
@@ -206,11 +201,7 @@ export const change_password = async (req, res) => {
       return res.status(400).json({ success: false, message: "Old password is incorrect." });
     }
 
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({ success: false, message: "New password and confirm password do not match." });
-    }
-
-    user.confirmPassword = confirmPassword;
+    // user.confirmPassword = confirmPassword;
     const hashedPassword = await bcryptjs.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();

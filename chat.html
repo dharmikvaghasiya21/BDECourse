@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Socket.io Chat Tester</title>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
   <h2>Simple Chat Tester</h2>
-
   <div>
     <label>Your User ID:</label>
     <input type="text" id="senderId" placeholder="Enter your User ID" />
@@ -33,7 +33,7 @@
 
     function connectSocket() {
       const senderId = document.getElementById("senderId").value;
-      socket = io("http://localhost:2222"); // change port if needed
+      socket = io("http://localhost:2222");
 
       socket.on("connect", () => {
         console.log("Connected to server:", socket.id);
@@ -60,4 +60,5 @@
     }
   </script>
 </body>
+
 </html>
