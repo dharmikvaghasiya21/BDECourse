@@ -5,6 +5,7 @@ import { adminJWT } from "../helper/jwt";
 const router = express.Router();
 
 router.get("/get", chatController.get_chat_between_users);
+router.post("/send", chatController.send_message);
 
 router.use(adminJWT)
 router.get("/getall", chatController.get_all_chats);
