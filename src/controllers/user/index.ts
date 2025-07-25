@@ -40,11 +40,10 @@ export const edit_user_by_id = async (req, res) => {
     reqInfo(req);
     console.log("Editing user with body:", req.body);
     try {
-        const { userId, email, phoneNumber } = req.body;
-        const user = await userModel.findOne({ _id: new ObjectId(userId), isDeleted: false });
+        const { id, email, phoneNumber } = req.body;
+        const user = await userModel.findOne({ _id: new ObjectId(id), isDeleted: false });
 
         if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
-
 
         const role = await userModel.findOne({ name: ADMIN_ROLES.USER, isDeleted: false });
         const roleId = new ObjectId(role?._id);
@@ -56,7 +55,7 @@ export const edit_user_by_id = async (req, res) => {
 
         req.body.roleId = roleId;
 
-        const updatedUser = await userModel.findOneAndUpdate({ _id: user._id }, req.body, { new: true });
+        const updatedUser = await userModel.findOneAndUpdate({ _id: new ObjectId(id) }, req.body, { new: true });
         if (!updatedUser) return res.status(404).json(new apiResponse(404, responseMessage.addDataError, {}, {}));
 
         return res.status(200).json(new apiResponse(200, responseMessage.updateDataSuccess("user"), updatedUser, {}));
