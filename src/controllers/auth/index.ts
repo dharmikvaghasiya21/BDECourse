@@ -48,9 +48,8 @@ export const login = async (req: Request, res: Response) => {
     }
     console.log("user===", user)
 
-    const isMatch = await bcryptjs.compare(user.password, password);
-    console.log("isMatch===", password)
-    console.log("isMatc", user.password)
+    const isMatch = await bcryptjs.compare(password, user.password);
+  
     if (!isMatch) {
       return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));
     }
@@ -73,7 +72,6 @@ export const login = async (req: Request, res: Response) => {
         userType: user.role || "user"
       }
     };
-    console.log("responce===", responseData)
     return res.status(200).json(new apiResponse(200, "Login successful", responseData, {}));
   } catch (error) {
     return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError || "Internal server error", {}, error));
@@ -200,7 +198,7 @@ export const change_password = async (req, res) => {
     const isMatch = await bcryptjs.compare(oldPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: "Old password is incorrect." });
-    }
+    } 
 
     // user.confirmPassword = confirmPassword;
     const hashedPassword = await bcryptjs.hash(newPassword, 10);
