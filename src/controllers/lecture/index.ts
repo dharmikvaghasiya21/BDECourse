@@ -8,9 +8,12 @@ export const addLecture = async (req, res) => {
     reqInfo(req);
     try {
         const body = req.body;
-        
+
         const user = req.user || req.headers.user;
         body.userId = user._id;
+
+        let isExist = await lectureModel.findOne({ type: body.type, priority: body.priority, isDeleted: false });
+        if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
 
         const lecture = await new lectureModel(body).save();
         return res.status(200).json(new apiResponse(200, "Lecture created", lecture, {}));
@@ -24,6 +27,10 @@ export const editLecture = async (req, res) => {
     try {
         const { id } = req.body;
         const body = req.body;
+
+        let isExist = await lectureModel.findOne({ type: body.type, priority: body.priority, isDeleted: false, _id: { $ne: new ObjectId(body.bannerId) } });
+        if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
+
         const updated = await lectureModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
 
         if (!updated) return res.status(404).json(new apiResponse(404, "Lecture not found", {}, {}));
@@ -56,7 +63,7 @@ export const getAllLectures = async (req, res) => {
             criteria.title = { $regex: search, $options: 'si' };
         }
 
-        if (courseFilter) criteria.courseId =  new ObjectId(courseFilter);
+        if (courseFilter) criteria.courseId = new ObjectId(courseFilter);
 
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 1;

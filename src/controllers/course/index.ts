@@ -14,6 +14,9 @@ export const addCourse = async (req, res) => {
         const user = req.user || req.headers.user;
         body.userId = user._id;
 
+        let isExist = await courseModel.findOne({ type: body.type, priority: body.priority, isDeleted: false });
+        if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
+
         const Course = await new courseModel(body).save();
         return res.status(200).json(new apiResponse(200, "Course created", Course, {}));
     } catch (error) {
@@ -73,6 +76,10 @@ export const editCourse = async (req, res) => {
     try {
         const { id } = req.body;
         const body = req.body;
+
+        let isExist = await courseModel.findOne({ type: body.type, priority: body.priority, isDeleted: false, _id: { $ne: new ObjectId(body.bannerId) } });
+        if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
+
         const updated = await courseModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
         if (!updated) { return res.status(404).json(new apiResponse(404, "Course not found", {}, {})); }
         return res.status(200).json(new apiResponse(200, "Course updated", updated, {}));
