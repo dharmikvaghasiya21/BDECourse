@@ -10,6 +10,7 @@
       "outDir": "./build",
       "forceConsistentCasingInFileNames": true,
       "emitDecoratorMetadata": true,
+       "types": ["node"],
       // "noImplicitReturns": true,
       // "noImplicitThis": true,
       // "noImplicitAny": true,

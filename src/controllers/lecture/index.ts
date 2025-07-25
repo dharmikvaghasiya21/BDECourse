@@ -8,6 +8,7 @@ export const addLecture = async (req, res) => {
     reqInfo(req);
     try {
         const body = req.body;
+        
         const user = req.user || req.headers.user;
         body.userId = user._id;
 

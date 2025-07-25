@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.io Chat Tester</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+  <h2>Simple Chat Tester</h2>
+
+  <div>
+    <label>Your User ID:</label>
+    <input type="text" id="senderId" placeholder="Enter your User ID" />
+  </div>
+
+  <div>
+    <label>Receiver ID:</label>
+    <input type="text" id="receiverId" placeholder="Enter Receiver's ID" />
+  </div>
+
+  <div>
+    <label>Message:</label>
+    <input type="text" id="message" placeholder="Enter your message" />
+  </div>
+
+  <button onclick="connectSocket()">Connect</button>
+  <button onclick="sendMessage()">Send Message</button>
+
+  <h3>Received Messages:</h3>
+  <div id="messages" style="border:1px solid #ccc; padding:10px;"></div>
+
+  <script>
+    let socket;
+
+    function connectSocket() {
+      const senderId = document.getElementById("senderId").value;
+      socket = io("http://localhost:2222"); // change port if needed
+
+      socket.on("connect", () => {
+        console.log("Connected to server:", socket.id);
+        socket.emit("join", senderId);
+      });
+
+      socket.on("receive_message", (data) => {
+        console.log("New message received:", data);
+        const messageDiv = document.getElementById("messages");
+        messageDiv.innerHTML += `<p><strong>${data.senderId}:</strong> ${data.message}</p>`;
+      });
+    }
+
+    function sendMessage() {
+      const senderId = document.getElementById("senderId").value;
+      const receiverId = document.getElementById("receiverId").value;
+      const message = document.getElementById("message").value;
+
+      socket.emit("send_message", {
+        senderId,
+        receiverId,
+        message
+      });
+    }
+  </script>
+</body>
+</html>

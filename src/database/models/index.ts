@@ -8,5 +8,7 @@ export * from './faq';
 export * from './privacy-policy';
 export * from './terms-condition';
 export * from './lecture';
+export * from './chat-student';
+export * from './chat';
 
  
