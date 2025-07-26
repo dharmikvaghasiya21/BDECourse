@@ -1,12 +1,12 @@
 // routes/profileRoutes.ts
 import express from 'express';
 import { courseController } from '../controllers';
-import { adminJWT, verifyToken } from '../helper/jwt';
+import { adminJWT  } from '../helper/jwt';
 
 const router = express.Router();
 // students
-router.get("/", verifyToken, courseController.getAllCourses);
-router.get("/:id", verifyToken, courseController.getCourseById);
+router.get("/", courseController.getAllCourses);
+router.get("/:id", courseController.getCourseById);
 
 // admin
 router.use(adminJWT);

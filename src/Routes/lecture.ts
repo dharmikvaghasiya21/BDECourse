@@ -1,11 +1,11 @@
 import express from 'express';
 import { lectureController } from "../controllers";
-import { adminJWT, verifyToken } from '../helper/jwt';
+import { adminJWT,  } from '../helper/jwt';
 
 const router = express.Router();
 
-router.get('/', verifyToken, lectureController.getAllLectures);
-router.get('/:id', verifyToken, lectureController.getLectureById);
+router.get('/', lectureController.getAllLectures);
+router.get('/:id', lectureController.getLectureById);
 
 
 // Admin 

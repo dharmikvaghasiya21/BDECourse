@@ -2,7 +2,7 @@ import { title } from "process";
 
 const mongoose = require('mongoose');
 
-const blogSchema = new mongoose.Schema({
+const latestNewsSchema = new mongoose.Schema({
     thumbnail: { type: String },
     image: { type: String },
 
@@ -10,9 +10,8 @@ const blogSchema = new mongoose.Schema({
     subtitle: { type: String, required: true },
 
     description: { type: String, required: true },
-    priority: { type: Number, default: 0 },
     isDeleted: { type: Boolean, default: false },
 
 }, { timestamps: true, versionKey: false });
 
-export const blogModel = mongoose.model('blog', blogSchema);
+export const latestNewsModel = mongoose.model('latestNews', latestNewsSchema);

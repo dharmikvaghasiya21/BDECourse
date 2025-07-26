@@ -9,10 +9,11 @@ import { aboutUsRoutes } from './about-us'
 import { privacyPolicyRoutes } from './privacy-policy'
 import { termsConditionRoutes } from './terms-condition'
 import { blogRoutes } from './blog'
+import { latestNewsRoutes } from './latestNews'
 import { faqRoutes } from './faq'
 import { uploadRoutes } from './upload'
 import { lectureRouter } from './lecture'
-import { adminJWT, verifyToken } from '../helper/jwt'
+import { adminJWT } from '../helper/jwt'
 
 const router = Router()
 // admin 
@@ -27,6 +28,7 @@ router.use('/course', courseRouter);
 router.use('/category', categoryRouter);
 router.use('/lecture', lectureRouter);
 router.use('/blog', blogRoutes);
+router.use('/latest-news', latestNewsRoutes);
 router.use('/faq', faqRoutes);
 router.use('/chat', chatRouter);
 

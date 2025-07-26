@@ -1,51 +1,51 @@
 import { apiResponse } from '../../common';
-import { blogModel } from '../../database';
+import { latestNewsModel } from '../../database/models/latestNews';
 import { reqInfo, responseMessage, countData } from '../../helper';
 
 let ObjectId = require("mongoose").Types.ObjectId;
 
-export const addBlog = async (req, res) => {
+export const addLatestNews = async (req, res) => {
     reqInfo(req)
     let body = req.body;
     try {
-        let isExist = await blogModel.findOne({ type: body.type, priority: body.priority, isDeleted: false });
+        let isExist = await latestNewsModel.findOne({ type: body.type, priority: body.priority, isDeleted: false });
         if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
-        const blog = await new blogModel(req.body).save();
-        return res.status(200).json(new apiResponse(200, responseMessage.addDataSuccess('Blog'), blog, {}));
+        const latestNews = await new latestNewsModel(req.body).save();
+        return res.status(200).json(new apiResponse(200, responseMessage.addDataSuccess('latestNews'), latestNews, {}));
     } catch (error) {
         console.log(error);
         return res.status(400).json(new apiResponse(400, responseMessage.internalServerError, {}, error));
     }
 };
 
-export const updateBlog = async (req, res) => {
+export const updateLatestNews = async (req, res) => {
     reqInfo(req)
     let body = req.body
     try {
-        let isExist = await blogModel.findOne({ type: body.type, priority: body.priority, isDeleted: false, _id: { $ne: new ObjectId(body.id) } });
+        let isExist = await latestNewsModel.findOne({ type: body.type, priority: body.priority, isDeleted: false, _id: { $ne: new ObjectId(body.id) } });
         if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
-        const blog = await blogModel.findOneAndUpdate({ _id: new ObjectId(body.id) }, body, { new: true })
-        if (!blog) return res.status(404).json(new apiResponse(404, responseMessage.updateDataError('Blog'), {}, {}));
-        return res.status(200).json(new apiResponse(200, responseMessage.updateDataSuccess('Blog'), blog, {}));
+        const latestNews = await latestNewsModel.findOneAndUpdate({ _id: new ObjectId(body.id) }, body, { new: true })
+        if (!latestNews) return res.status(404).json(new apiResponse(404, responseMessage.updateDataError('latestNews'), {}, {}));
+        return res.status(200).json(new apiResponse(200, responseMessage.updateDataSuccess('latestNews'), latestNews, {}));
     } catch (error) {
         console.log(error);
         return res.status(400).json(new apiResponse(400, responseMessage.internalServerError, {}, error));
     }
 };
 
-export const deleteBlog = async (req, res) => {
+export const deleteLatestNews = async (req, res) => {
     reqInfo(req)
     try {
-        const blog = await blogModel.findOneAndUpdate({ _id: new ObjectId(req.params.id), isDeleted: false }, { isDeleted: true }, { new: true });
-        if (!blog) return res.status(404).json(new apiResponse(404, responseMessage.getDataNotFound('Blog'), {}, {}));
-        return res.status(200).json(new apiResponse(200, responseMessage.deleteDataSuccess('Blog'), blog, {}));
+        const latestNews = await latestNewsModel.findOneAndUpdate({ _id: new ObjectId(req.params.id), isDeleted: false }, { isDeleted: true }, { new: true });
+        if (!latestNews) return res.status(404).json(new apiResponse(404, responseMessage.getDataNotFound('latestNews'), {}, {}));
+        return res.status(200).json(new apiResponse(200, responseMessage.deleteDataSuccess('latestNews'), latestNews, {}));
     } catch (error) {
         console.log(error);
         return res.status(400).json(new apiResponse(400, responseMessage.internalServerError, {}, error));
     }
 };
 
-export const listBlogs = async (req, res) => {
+export const listLatestNews = async (req, res) => {
     reqInfo(req)
     try {
         const { search, page, limit } = req.query;
@@ -67,8 +67,8 @@ export const listBlogs = async (req, res) => {
             sort: { createdAt: -1 }
         };
 
-        const blogs = await blogModel.find(criteria, null, options);
-        const totalCount = await countData(blogModel, criteria);
+        const latestNews = await latestNewsModel.find(criteria, null, options);
+        const totalCount = await countData(latestNewsModel, criteria);
 
         const stateObj = {
             page: pageNum,
@@ -76,14 +76,14 @@ export const listBlogs = async (req, res) => {
             page_limit: Math.ceil(totalCount / limitNum) || 1,
         };
 
-        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('Blogs'), { blog_data: blogs, totalData: totalCount, state: stateObj }, {}));
+        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('latestNews'), { latestNews_data: latestNews, totalData: totalCount, state: stateObj }, {}));
     } catch (error) {
         console.log(error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
 
-export const listUserBlogs = async (req, res) => {
+export const listUserLatestNews = async (req, res) => {
     reqInfo(req)
     try {
         const { search, page, limit } = req.query;
@@ -105,8 +105,8 @@ export const listUserBlogs = async (req, res) => {
             sort: { createdAt: -1 }
         };
 
-        const blogs = await blogModel.find(criteria, null, options);
-        const totalCount = await countData(blogModel, criteria);
+        const latestNews = await latestNewsModel.find(criteria, null, options);
+        const totalCount = await countData(latestNewsModel, criteria);
 
         const stateObj = {
             page: pageNum,
@@ -114,19 +114,20 @@ export const listUserBlogs = async (req, res) => {
             page_limit: Math.ceil(totalCount / limitNum) || 1,
         };
 
-        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('Blogs'), { blog_data: blogs, totalData: totalCount, state: stateObj }, {}));
+        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('latestNews'), { latestNews_data: latestNews, totalData: totalCount, state: stateObj }, {}));
     } catch (error) {
         console.log(error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
 
-export const getBlog = async (req, res) => {
+
+export const getLatestNews = async (req, res) => {
     reqInfo(req)
     try {
-        const blog = await blogModel.findOne({ _id: new ObjectId(req.params.id), isDeleted: false });
-        if (!blog) return res.status(404).json(new apiResponse(404, responseMessage.getDataNotFound('Blog'), {}, {}));
-        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('Blog'), blog, {}));
+        const latestNews = await latestNewsModel.findOne({ _id: new ObjectId(req.params.id), isDeleted: false });
+        if (!latestNews) return res.status(404).json(new apiResponse(404, responseMessage.getDataNotFound('latestNews'), {}, {}));
+        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('latestNews'), latestNews, {}));
     } catch (error) {
         console.log(error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));

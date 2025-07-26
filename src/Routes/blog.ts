@@ -1,10 +1,10 @@
 import express from 'express';
 import { blogController } from '../controllers';
-import { adminJWT, verifyToken } from '../helper/jwt';
+import { adminJWT } from '../helper/jwt';
 const router = express.Router();
 
 
-router.get('/user', verifyToken, blogController.listUserBlogs);
+router.get('/user', blogController.listUserBlogs);
 
 
 router.use(adminJWT)

@@ -149,11 +149,8 @@ export const reset_password = async (req, res) => {
       return res.status(400).json(new apiResponse(400, "OTP has expired", {}, {}));
     }
 
-    const hashedPassword = await bcryptjs.hash(newPassword, 10);
-
     await userModel.findByIdAndUpdate(user._id, {
-      password: hashedPassword,
-      confirmPassword: newPassword,
+      password: newPassword,
       otp: null,
       otpExpireTime: null
     });
