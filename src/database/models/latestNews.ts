@@ -8,6 +8,8 @@ const latestNewsSchema = new mongoose.Schema({
 
     title: { type: String, required: true },
     subtitle: { type: String, required: true },
+    priority: { type: Number, default: 0 },
+
 
     description: { type: String, required: true },
     isDeleted: { type: Boolean, default: false },

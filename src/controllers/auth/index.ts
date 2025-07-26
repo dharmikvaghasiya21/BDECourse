@@ -48,10 +48,11 @@ export const login = async (req, res) => {
     }
     if (user.isBlocked) { return res.status(403).json(new apiResponse(403, 'Your account is blocked', {}, {})); }
 
-    const isMatch = await bcryptjs.compare(password, user.password);
-    if (!isMatch) {
+    if (password !== user.password) {
       return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));
     }
+    
+
     const token = jwt.sign(
       {
         _id: user._id,
