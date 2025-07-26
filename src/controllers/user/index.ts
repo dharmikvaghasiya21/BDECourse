@@ -73,9 +73,9 @@ export const get_all_users = async (req, res) => {
     let options: any = { lean: true, sort: { createdAt: -1 } };
 
     try {
-        if (blockFilter === 'true') {
+        if (blockFilter === 'block') {
             criteria.isBlocked = true;
-        } else if (blockFilter === 'false') {
+        } else if (blockFilter === 'unblock') {
             criteria.isBlocked = false;
         }
 
