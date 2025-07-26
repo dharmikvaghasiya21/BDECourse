@@ -9,7 +9,7 @@ router.post("/send", chatController.send_message);
 
 router.use(adminJWT)
 router.get("/getall", chatController.get_all_chats);
-router.post("/delete", chatController.delete_chat);
+router.delete("/delete/:id", chatController.delete_chat);
 router.post("/block", chatController.block_user);
 
 

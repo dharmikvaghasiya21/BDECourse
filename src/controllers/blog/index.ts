@@ -19,7 +19,7 @@ export const updateBlog = async (req, res) => {
     reqInfo(req)
     let body = req.body
     try {
-        const blog = await blogModel.findOneAndUpdate({ _id: new ObjectId(body.blogId) }, body, { new: true })
+        const blog = await blogModel.findOneAndUpdate({ _id: new ObjectId(body.id) }, body, { new: true })
         if (!blog) return res.status(404).json(new apiResponse(404, responseMessage.updateDataError('Blog'), {}, {}));
         return res.status(200).json(new apiResponse(200, responseMessage.updateDataSuccess('Blog'), blog, {}));
     } catch (error) {
@@ -45,17 +45,12 @@ export const listBlogs = async (req, res) => {
     try {
         const { search, page, limit } = req.query;
         const criteria: any = { isDeleted: false };
-        
+
         if (search) {
             const regex = { $regex: search, $options: 'si' };
             criteria.$or = [
                 { title: regex },
-                { content: regex },
-                { tags: regex },
-                { metaTitle: regex },
-                { metaDescription: regex },
-                { metaKeywords: regex },
-                { category: regex }
+                { subtitle: regex }
             ];
         }
 
@@ -93,12 +88,7 @@ export const listUserBlogs = async (req, res) => {
             const regex = { $regex: search, $options: 'si' };
             criteria.$or = [
                 { title: regex },
-                { content: regex },
-                { tags: regex },
-                { metaTitle: regex },
-                { metaDescription: regex },
-                { metaKeywords: regex },
-                { category: regex }
+                { subtitle: regex }
             ];
         }
 

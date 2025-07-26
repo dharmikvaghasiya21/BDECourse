@@ -8,7 +8,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 export const add_faq = async (req, res) => {
     reqInfo(req)
-    let { user } = req.headers
+    // let { user } = req.headers
 
     try {
         const { error, value } = addEditFaqSchema.validate(req.body)

@@ -95,7 +95,7 @@
   </div>
 
   <script>
-    const API_BASE = "http://localhost:2222"; // 👈 Update if hosted elsewhere
+    const API_BASE = "http://localhost:2222";
 
     async function sendMessage() {
       const senderId = document.getElementById("sendSenderId").value;
@@ -111,7 +111,7 @@
       const data = await res.json();
       document.getElementById("sendResult").textContent = JSON.stringify(data, null, 2);
     }
-
+    
     async function getChatBetweenUsers() {
       const senderId = document.getElementById("senderId").value;
       const receiverId = document.getElementById("receiverId").value;

@@ -1,3 +1,4 @@
+import { getPriority } from "os";
 import { apiResponse } from "../../common";
 import { lectureModel } from "../../database";
 import { countData, getData, reqInfo, responseMessage } from "../../helper";

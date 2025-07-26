@@ -15,4 +15,4 @@ router.post('/add', lectureController.addLecture);
 router.post('/edit', lectureController.editLecture);
 router.delete('/:id', lectureController.deleteLecture);
 
-export const lectureRouter = router; 
+export const lectureRouter = router;

@@ -13,4 +13,4 @@ router.post('/edit', blogController.updateBlog);
 router.delete('/:id', blogController.deleteBlog);
 router.get('/:id', blogController.getBlog);
 
-export const blogRoutes = router; 
+export const blogRoutes = router;

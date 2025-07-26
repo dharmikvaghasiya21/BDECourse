@@ -68,17 +68,24 @@ export const get_all_users = async (req, res) => {
     reqInfo(req);
     console.log("Fetching all users with query:", req.query);
 
-    let { page, limit, search } = req.query;
+    let { page, limit, search, blockFilter } = req.query;
     let criteria: any = { isDeleted: false };
     let options: any = { lean: true, sort: { createdAt: -1 } };
 
     try {
+        if (blockFilter === 'true') {
+            criteria.isBlocked = true;
+        } else if (blockFilter === 'false') {
+            criteria.isBlocked = false;
+        }
+
         if (search) {
             criteria.$or = [
                 { firstName: { $regex: search, $options: 'si' } },
                 { lastName: { $regex: search, $options: 'si' } },
                 { email: { $regex: search, $options: 'si' } },
-                { phoneNumber: { $regex: search, $options: 'si' } }
+                { phoneNumber: { $regex: search, $options: 'si' } },
+                // { isBlocked: { $regex: search, $options: 'si' } }
             ];
         }
         criteria.role = "user";
