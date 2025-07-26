@@ -4,13 +4,12 @@ import { adminJWT, verifyToken } from '../helper/jwt';
 
 const router = express.Router();
 
-router.get('/', lectureController.getAllLectures);
-router.get('/:id', lectureController.getLectureById);
+router.get('/', verifyToken, lectureController.getAllLectures);
+router.get('/:id', verifyToken, lectureController.getLectureById);
 
 
 // Admin 
 router.use(adminJWT);
-router.use(verifyToken);
 router.post('/add', lectureController.addLecture);
 router.post('/edit', lectureController.editLecture);
 router.delete('/:id', lectureController.deleteLecture);

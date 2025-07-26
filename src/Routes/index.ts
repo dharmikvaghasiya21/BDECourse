@@ -31,7 +31,6 @@ router.use('/faq', faqRoutes);
 router.use('/chat', chatRouter);
 
 router.use(adminJWT);
-router.use(verifyToken);
 router.use('/upload', uploadRoutes);
 
 export { router }

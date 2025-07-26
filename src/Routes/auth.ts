@@ -1,7 +1,7 @@
 // routes/profileRoutes.ts
 import express from 'express';
 import { authController } from '../controllers';
-import { adminJWT, verifyToken } from '../helper/jwt';
+import { adminJWT } from '../helper/jwt';
 
 const router = express.Router();
 
@@ -12,7 +12,6 @@ router.post('/verify-otp', authController.verify_otp);
 router.post('/reset-password', authController.reset_password);
 
 router.use(adminJWT)
-router.use(verifyToken);
 router.post('/change-password', authController.change_password)
 
 export default router;

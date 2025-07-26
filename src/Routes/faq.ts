@@ -4,14 +4,12 @@ import { adminJWT, verifyToken } from '../helper/jwt';
 
 const router = express.Router();
 
+
+router.get('/', verifyToken, faqController.get_all_faqs)
+router.get('/:id', verifyToken, faqController.get_faq_by_id)
+
 // Admin routes
-
-// Public routes
-router.get('/', faqController.get_all_faqs)
-router.get('/:id', faqController.get_faq_by_id)
-
 router.use(adminJWT);
-router.use(verifyToken);
 router.post('/add', faqController.add_faq)
 router.post('/edit', faqController.edit_faq)
 router.delete('/:id', faqController.delete_faq)

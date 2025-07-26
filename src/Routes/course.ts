@@ -5,12 +5,11 @@ import { adminJWT, verifyToken } from '../helper/jwt';
 
 const router = express.Router();
 // students
-router.get("/", courseController.getAllCourses);
-router.get("/:id", courseController.getCourseById);
+router.get("/", verifyToken, courseController.getAllCourses);
+router.get("/:id", verifyToken, courseController.getCourseById);
 
 // admin
 router.use(adminJWT);
-router.use(verifyToken);
 router.post('/add', courseController.addCourse);
 router.post("/edit", courseController.editCourse);
 router.delete("/delete/:id", courseController.deleteCourse);
