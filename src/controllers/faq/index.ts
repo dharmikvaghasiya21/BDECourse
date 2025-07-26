@@ -2,14 +2,12 @@ import { reqInfo, responseMessage } from "../../helper";
 import { faqModel } from "../../database/models";
 import { apiResponse } from "../../common";
 import { getData, countData } from "../../helper";
-import { addEditFaqSchema, getFaqByCategorySchema, updateFaqSchema } from "../../validation/faq";
+import { addEditFaqSchema, updateFaqSchema } from "../../validation/faq";
 
 const ObjectId = require('mongoose').Types.ObjectId;
 
 export const add_faq = async (req, res) => {
     reqInfo(req)
-    // let { user } = req.headers
-
     try {
         const { error, value } = addEditFaqSchema.validate(req.body)
         if (error) return res.status(501).json(new apiResponse(501, error?.details[0]?.message, {}, {}))
@@ -59,19 +57,14 @@ export const delete_faq = async (req, res) => {
         console.log(error);
         return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError, {}, error))
     }
-} 
+}
 
 export const get_all_faqs = async (req, res) => {
     reqInfo(req)
-    let { page, limit, search, category, isActive } = req.query, criteria: any = { isDeleted: false };
+    let { page, limit, search, isActive } = req.query, criteria: any = { isDeleted: false };
     let options: any = { lean: true };
 
     try {
-        // Filter by category
-        if (category) {
-            criteria.category = category;
-        }
-
         // Search functionality
         if (search) {
             criteria.$or = [
@@ -108,26 +101,26 @@ export const get_all_faqs = async (req, res) => {
     }
 }
 
-export const get_faq_by_category = async (req, res) => {
-    reqInfo(req)
-    let { category } = req.params
+// export const get_faq_by_category = async (req, res) => {
+//     reqInfo(req)
+//     let { category } = req.params
 
-    try {
-        const { error, value } = getFaqByCategorySchema.validate({ category })
-        if (error) return res.status(501).json(new apiResponse(501, error?.details[0]?.message, {}, {}))
+//     try {
+//         const { error, value } = getFaqByCategorySchema.validate({ category })
+//         if (error) return res.status(501).json(new apiResponse(501, error?.details[0]?.message, {}, {}))
 
-        const response = await faqModel.find({
-            category: value.category,
-            isDeleted: false,
-            isActive: true
-        }).sort({ createdAt: -1 })
+//         const response = await faqModel.find({
+//             category: value.category,
+//             isDeleted: false,
+//             isActive: true
+//         }).sort({ createdAt: -1 })
 
-        return res.status(200).json(new apiResponse(200, responseMessage?.getDataSuccess("FAQs by category"), response, {}))
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError, {}, error))
-    }
-}
+//         return res.status(200).json(new apiResponse(200, responseMessage?.getDataSuccess("FAQs by category"), response, {}))
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError, {}, error))
+//     }
+// }
 
 export const get_faq_by_id = async (req, res) => {
     reqInfo(req)

@@ -85,7 +85,6 @@ export const get_all_users = async (req, res) => {
                 { lastName: { $regex: search, $options: 'si' } },
                 { email: { $regex: search, $options: 'si' } },
                 { phoneNumber: { $regex: search, $options: 'si' } },
-                // { isBlocked: { $regex: search, $options: 'si' } }
             ];
         }
         criteria.role = "user";

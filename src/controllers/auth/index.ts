@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_TOKEN_SECRET;
 
 // const TOKEN_EXPIRE = "1d";
 
-export const signUp = async (req , res) => {
+export const signUp = async (req, res) => {
   reqInfo(req)
   try {
     const body = req.body;
@@ -46,10 +46,9 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(400).json(new apiResponse(400, "Invalid email", {}, {}));
     }
-    // console.log("user===", user)
+    if (user.isBlocked) { return res.status(403).json(new apiResponse(403, 'Your account is blocked', {}, {})); }
 
     const isMatch = await bcryptjs.compare(password, user.password);
-  
     if (!isMatch) {
       return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));
     }
@@ -198,7 +197,7 @@ export const change_password = async (req, res) => {
     const isMatch = await bcryptjs.compare(oldPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: "Old password is incorrect." });
-    } 
+    }
 
     const hashedPassword = await bcryptjs.hash(newPassword, 10);
     user.password = hashedPassword;

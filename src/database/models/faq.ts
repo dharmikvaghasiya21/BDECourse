@@ -6,7 +6,7 @@ const faqSchema: any = new mongoose.Schema({
     question: { type: String },
     answer: { type: String },
     priority: { type: Number, default: 0 },
-    // category: { type: String, enum: Object.values(FAQ_CATEGORIES), default: FAQ_CATEGORIES.GENERAL },
+
     isDeleted: { type: Boolean, default: false },
     isBlocked: { type: Boolean, default: false },
 }, { timestamps: true, versionKey: false })
