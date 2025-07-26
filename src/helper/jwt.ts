@@ -32,3 +32,27 @@ export const adminJWT = async (req, res, next) => {
         return res.status(401).json(new apiResponse(401, responseMessage?.tokenNotFound, {}, {}))
     }
 }
+
+export const verifyToken = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) return res.status(401).json(new apiResponse(401, "Access denied. No token provided.", {}, {}));
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await userModel.findById(decoded._id);
+
+        if (!user || user.isDeleted) {
+            return res.status(401).json(new apiResponse(401, "Invalid token.", {}, {}));
+        }
+
+        if (user.isBlocked) {
+            return res.status(403).json(new apiResponse(403, "Your account has been blocked.", {}, {}));
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json(new apiResponse(500, "Something went wrong", {}, {}));
+    }
+};

@@ -1,6 +1,6 @@
 import express from 'express';
 import { lectureController } from "../controllers";
-import { adminJWT } from '../helper/jwt';
+import { adminJWT, verifyToken } from '../helper/jwt';
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ router.get('/:id', lectureController.getLectureById);
 
 // Admin 
 router.use(adminJWT);
-
+router.use(verifyToken);
 router.post('/add', lectureController.addLecture);
 router.post('/edit', lectureController.editLecture);
 router.delete('/:id', lectureController.deleteLecture);

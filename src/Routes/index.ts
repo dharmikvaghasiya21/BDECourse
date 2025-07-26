@@ -12,7 +12,7 @@ import { blogRoutes } from './blog'
 import { faqRoutes } from './faq'
 import { uploadRoutes } from './upload'
 import { lectureRouter } from './lecture'
-import { adminJWT } from '../helper/jwt'
+import { adminJWT, verifyToken } from '../helper/jwt'
 
 const router = Router()
 // admin 
@@ -31,6 +31,7 @@ router.use('/faq', faqRoutes);
 router.use('/chat', chatRouter);
 
 router.use(adminJWT);
+router.use(verifyToken);
 router.use('/upload', uploadRoutes);
 
 export { router }

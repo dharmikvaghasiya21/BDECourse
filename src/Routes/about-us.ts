@@ -1,6 +1,6 @@
 import express from 'express';
 import { aboutUsController } from "../controllers";
-import { adminJWT } from '../helper/jwt';
+import { adminJWT, verifyToken } from '../helper/jwt';
 
 
 const router = express.Router();
@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/', aboutUsController.get_about_us)
 
 router.use(adminJWT)
+router.use(verifyToken);
 router.post('/add/edit', aboutUsController.add_edit_about_us)
 
 export const aboutUsRoutes = router;
