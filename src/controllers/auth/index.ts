@@ -51,7 +51,7 @@ export const login = async (req, res) => {
     if (password !== user.password) {
       return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));
     }
-    
+
 
     const token = jwt.sign(
       {
@@ -185,7 +185,7 @@ export const reset_password = async (req, res) => {
 export const change_password = async (req, res) => {
   reqInfo(req)
   try {
-    const { email, oldPassword, newPassword, confirmPassword } = req.body;
+    const { email, oldPassword, newPassword } = req.body;
 
     const user = await userModel.findOne({ email });
     if (!user) {
@@ -196,9 +196,7 @@ export const change_password = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ success: false, message: "Old password is incorrect." });
     }
-
-    const hashedPassword = await bcryptjs.hash(newPassword, 10);
-    user.password = hashedPassword;
+    user.password = newPassword;
     await user.save();
 
     return res.status(200).json(new apiResponse(200, "password changed successfully.", {}, {}));
