@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     phoneNumber: { type: String, required: true },
     password: { type: String, required: true },
     confirmPassword: { type: String, required: true },
-
+    
     otp: { type: Number, default: null },
     otpExpireTime: { type: Date, default: null },
     isDeleted: { type: Boolean, default: false },

@@ -1,7 +1,7 @@
 
 import { Request, Response } from "express";
 import bcryptjs from "bcryptjs";
-import { ADMIN_ROLES, apiResponse } from "../../common";
+import { ADMIN_ROLES, apiResponse, USER_ROLE } from "../../common";
 import { reqInfo, responseMessage, sendEmail } from "../../helper";
 import { userModel } from "../../database/models";
 import jwt from "jsonwebtoken";
@@ -9,7 +9,6 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_TOKEN_SECRET;
 
-// const TOKEN_EXPIRE = "1d";
 import bcrypt from 'bcrypt';
 
 export const signUp = async (req, res) => {
@@ -32,8 +31,7 @@ export const signUp = async (req, res) => {
     }
     const salt = await bcrypt.genSalt(10);
     body.password = await bcrypt.hash(body.password, salt);
-    delete body.confirmPassword;
-
+    body.confirmPassword = body.password;
     body.userType = ADMIN_ROLES.ADMIN;
 
     const savedUser = await new userModel(body).save();
@@ -150,21 +148,16 @@ export const verify_otp = async (req, res) => {
 export const reset_password = async (req, res) => {
   reqInfo(req);
   try {
-    const { email, newPassword, confirmPassword } = req.body;
-
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json(new apiResponse(400, "Passwords do not match", {}, {}));
-    }
+    const { email, newPassword } = req.body;
 
     const user = await userModel.findOne({ email, isDeleted: false });
     if (!user) {
       return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
     }
+    req.body.confirmPassword = req.body.password;
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
     user.password = hashedPassword;
-    user.confirmPassword = req.body.confirmPassword;
 
     await user.save();
 
@@ -184,24 +177,28 @@ export const reset_password = async (req, res) => {
 
 
 
-
 export const change_password = async (req, res) => {
   reqInfo(req);
   try {
-    const { email, oldPassword, newPassword } = req.body;
+    const { email, oldPassword, newPassword, confirmPassword } = req.body;
 
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.status(404).json({ success: false, message: "Email not found." });
+      return res.status(404).json(new apiResponse(404, "Email not found.", {}, {}));
     }
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) {
-      return res.status(400).json({ success: false, message: "Old password is incorrect." });
+      return res.status(400).json(new apiResponse(400, "Old password is incorrect.", {}, {}));
     }
 
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json(new apiResponse(400, "New password and confirm password do not match.", {}, {}));
+    }
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedNewPassword;
+    user.confirmPassword = req.body.confirmPassword;
+
 
     await user.save();
 

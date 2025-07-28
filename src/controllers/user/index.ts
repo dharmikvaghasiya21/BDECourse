@@ -21,10 +21,12 @@ export const add_user = async (req, res) => {
         if (existingPhone)
             return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("phoneNumber"), {}, {}));
 
+        req.body.confirmPassword = req.body.password;
+
         const saltRounds = 10;
         body.password = await bcrypt.hash(body.password, saltRounds);
 
-        body.confirmPassword = body.confirmPassword;
+        // Ensure confirmPassword matches password
 
         body.role = USER_ROLE.USER;
 
@@ -60,8 +62,7 @@ export const edit_user_by_id = async (req, res) => {
             isDeleted: false,
             _id: { $ne: user._id }
         });
-        if (emailExist)
-            return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("email"), {}, {}));
+        if (emailExist) return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("email"), {}, {}));
 
         const phoneExist = await userModel.findOne({
             phoneNumber,
@@ -74,14 +75,8 @@ export const edit_user_by_id = async (req, res) => {
 
         req.body.roleId = roleId;
         if (password) {
-            if (!confirmPassword) {
-                return res.status(400).json(new apiResponse(400, "Confirm password is required", {}, {}));
-            }
-            if (password !== confirmPassword) {
-                return res.status(400).json(new apiResponse(400, "Password and Confirm Password do not match", {}, {}));
-            }
-
             const saltRounds = 10;
+            req.body.confirmPassword = password;
             req.body.password = await bcrypt.hash(password, saltRounds);
         }
         req.body.confirmPassword = req.body.confirmPassword;
