@@ -8,7 +8,7 @@ export const addEditFaqSchema = Joi.object().keys({
 })
 
 export const updateFaqSchema = Joi.object().keys({
-    faqId: Joi.string().required(),
+    id: Joi.string().required(),
     question: Joi.string().optional(),
     answer: Joi.string().optional(),
     category: Joi.string().optional().default('general'),

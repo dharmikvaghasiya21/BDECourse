@@ -1,6 +1,6 @@
 import { IdentityStore } from 'aws-sdk';
 import { ADMIN_ROLES, USER_ROLE, apiResponse } from '../../common';
-import { userModel } from '../../database';
+import { chatModel, userModel } from '../../database';
 import { countData, getData, reqInfo, responseMessage } from '../../helper';
 import bcrypt from 'bcryptjs';
 import c from 'config';
@@ -100,11 +100,10 @@ export const edit_user_by_id = async (req, res) => {
 
 export const get_all_users = async (req, res) => {
     reqInfo(req);
-    console.log("Fetching all users with query:", req.query);
-
     let { page, limit, search, blockFilter, role } = req.query;
     let criteria: any = { isDeleted: false };
     let options: any = { lean: true, sort: { createdAt: -1 } };
+    let loggedInUser: any = req.headers?.user;
 
     try {
         if (blockFilter === 'block') {
@@ -127,13 +126,24 @@ export const get_all_users = async (req, res) => {
                 { phoneNumber: { $regex: search, $options: 'si' } },
             ];
         }
+
         if (page && limit) {
             options.skip = (parseInt(page) - 1) * parseInt(limit);
             options.limit = parseInt(limit);
         }
 
-        const response = await getData(userModel, criteria, {}, options);
-        const totalCount = await countData(userModel, criteria);
+        const users = await userModel.find(criteria, {}, options).lean();
+        const totalCount = await userModel.countDocuments(criteria);
+
+        const usersWithUnread = await Promise.all(users.map(async user => {
+            const unreadCount = await chatModel.countDocuments({
+                senderId: user._id,
+                receiverId: loggedInUser?._id,
+                seen: false,
+                isDeleted: false
+            });
+            return { ...user, unreadCount };
+        }));
 
         const stateObj = {
             page: parseInt(page) || 1,
@@ -142,7 +152,7 @@ export const get_all_users = async (req, res) => {
         };
 
         return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('User'), {
-            user_data: response,
+            user_data: usersWithUnread,
             totalData: totalCount,
             state: stateObj
         }, {}));

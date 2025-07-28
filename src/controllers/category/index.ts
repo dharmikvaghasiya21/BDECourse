@@ -45,7 +45,7 @@ export const deleteCategory = async (req, res) => {
         const deleted = await categoryModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, { isDeleted: true }, { new: true });
         if (!deleted) return res.status(404).json(new apiResponse(404, "Category not found", {}, {}));
 
-        return res.status(200).json(new apiResponse(200, "Category deleted (soft)", {}, {}));
+        return res.status(200).json(new apiResponse(200, "Category deleted (soft)", deleted, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }

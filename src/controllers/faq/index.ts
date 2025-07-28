@@ -26,23 +26,24 @@ export const add_faq = async (req, res) => {
 }
 
 export const edit_faq = async (req, res) => {
-    reqInfo(req)
+    reqInfo(req);
     try {
-        const { error, value } = updateFaqSchema.validate(req.body)
-        if (error) return res.status(501).json(new apiResponse(501, error?.details[0]?.message, {}, {}))
+        const { error, value } = updateFaqSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json(new apiResponse(400, error?.details[0]?.message, {}, {}));
+        }
+        let isExist = await faqModel.findOne({ priority: value.priority, isDeleted: false, _id: { $ne: new ObjectId(value.id) } });
+        if (isExist) { return res.status(400).json(new apiResponse(400, responseMessage?.dataAlreadyExist("priority"), {}, {})); }
+        const response = await faqModel.findOneAndUpdate({ _id: new ObjectId(value.id), isDeleted: false }, value, { new: true });
 
-        let isExist = await faqModel.findOne({ priority: value.priority, isDeleted: false, _id: { $ne: new ObjectId(value.faqId) } })
-        if (isExist) return res.status(400).json(new apiResponse(400, responseMessage?.dataAlreadyExist("priority"), {}, {}))
+        if (!response) { return res.status(404).json(new apiResponse(404, responseMessage?.getDataNotFound("FAQ"), {}, {})); }
 
-        const response = await faqModel.findOneAndUpdate({ _id: new ObjectId(value.faqId), isDeleted: false }, value, { new: true })
-        if (!response) return res.status(404).json(new apiResponse(404, responseMessage?.getDataNotFound("FAQ"), {}, {}))
-
-        return res.status(200).json(new apiResponse(200, responseMessage?.updateDataSuccess("FAQ"), response, {}))
+        return res.status(200).json(new apiResponse(200, responseMessage?.updateDataSuccess("FAQ"), response, {}));
     } catch (error) {
-        console.log(error);
-        return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError, {}, error))
+        console.error("Edit FAQ error:", error);
+        return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError, {}, error));
     }
-}
+};
 
 export const delete_faq = async (req, res) => {
     reqInfo(req)

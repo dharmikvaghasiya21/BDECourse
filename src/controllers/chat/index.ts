@@ -21,6 +21,8 @@ export const send_message = async (req, res) => {
     return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
   }
 };
+
+
 export const get_all_chats = async (req, res) => {
   try {
     const { senderId, receiverId } = req.query;

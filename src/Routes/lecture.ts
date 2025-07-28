@@ -12,6 +12,6 @@ router.get('/:id', lectureController.getLectureById);
 router.use(adminJWT);
 router.post('/add', lectureController.addLecture);
 router.post('/edit', lectureController.editLecture);
-router.delete('/:id', lectureController.deleteLecture);
+router.delete('/delete/:id', lectureController.deleteLecture);
 
 export const lectureRouter = router;

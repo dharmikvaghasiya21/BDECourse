@@ -42,24 +42,38 @@ router.post('', async (req: any, res: any) => {
 });
 
 router.delete("/", (req: any, res: any) => {
-    reqInfo(req)
+    reqInfo(req);
     try {
-        const { imageUrl } = req.body;
-        if (!imageUrl) return res.status(400).json(new apiResponse(400, "Image URL is required", {}, {}));
+        const { fileUrl } = req.body;
+        if (!fileUrl) {
+            return res.status(400).json(new apiResponse(400, "File URL is required", {}, {}));
+        }
 
-        const parsedUrl = url.parse(imageUrl);
+        const parsedUrl = url.parse(fileUrl);
         const filename = path.basename(parsedUrl.pathname || "");
 
-        if (!filename) return res.status(400).json(new apiResponse(400, "Invalid image URL", {}, {}));
+        if (!filename) {
+            return res.status(400).json(new apiResponse(400, "Invalid file URL", {}, {}));
+        }
 
-        const imagePath = path.join(process.cwd(), "uploads", filename);
+        let filePath = "";
+        if (parsedUrl.pathname?.includes("/uploads/")) {
+            filePath = path.join(process.cwd(), "uploads", filename);
+        } else if (parsedUrl.pathname?.includes("/pdf/")) {
+            filePath = path.join(__dirname, "../../../pdf", filename);
+        } else {
+            return res.status(400).json(new apiResponse(400, "Invalid file type or path", {}, {}));
+        }
 
-        if (!fs.existsSync(imagePath)) return res.status(404).json(new apiResponse(404, "Image not found", {}, {}));
-        fs.unlinkSync(imagePath);
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json(new apiResponse(404, "File not found", {}, {}));
+        }
 
-        return res.status(200).json(new apiResponse(200, "Image deleted successfully", {}, {}));
+        fs.unlinkSync(filePath);
+
+        return res.status(200).json(new apiResponse(200, "File deleted successfully", {}, {}));
     } catch (error) {
-        console.log(error)
+        console.log("Delete Error =>", error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 });
