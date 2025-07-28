@@ -22,19 +22,19 @@ export const send_message = async (req, res) => {
 };
 export const get_all_chats = async (req, res) => {
   try {
-    const { user1, admin } = req.query;
+    const { senderId, receiverId } = req.query;
 
-    if (!user1 || !admin) {
+    if (!senderId || !receiverId) {
       return res.status(400).json({
         success: false,
-        message: "Both user1 and admin are required."
+        message: "Both senderId and receiverId are required."
       });
     }
 
     const allChats = await chatModel.find({
       $or: [
-        { senderId: user1, receiverId: admin },
-        { senderId: admin, receiverId: user1 }
+        { senderId: senderId, receiverId: receiverId },
+        { senderId: receiverId, receiverId: senderId }
       ]
     })
       .sort({ createdAt: 1 })
