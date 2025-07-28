@@ -10,13 +10,16 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_TOKEN_SECRET;
 
 // const TOKEN_EXPIRE = "1d";
+import bcrypt from 'bcrypt';
 
 export const signUp = async (req, res) => {
   reqInfo(req)
   try {
     const body = req.body;
+    if (body.password !== body.confirmPassword) {
+      return res.status(400).json(new apiResponse(400, "Passwords do not match", {}, {}));
+    }
     let existingUser = await userModel.findOne({ email: body?.email, isDeleted: false });
-
     if (existingUser)
       return res.status(409).json(new apiResponse(409, responseMessage?.alreadyEmail || "Email already exists", {}, {}));
 
@@ -24,7 +27,14 @@ export const signUp = async (req, res) => {
     if (existingUser)
       return res.status(409).json(new apiResponse(409, "Phone number already exists", {}, {}));
 
-    body.userType = ADMIN_ROLES.ADMIN
+    if (!body.password || !body.confirmPassword) {
+      return res.status(400).json(new apiResponse(400, "Password and confirm password are required", {}, {}));
+    }
+    const salt = await bcrypt.genSalt(10);
+    body.password = await bcrypt.hash(body.password, salt);
+    delete body.confirmPassword;
+
+    body.userType = ADMIN_ROLES.ADMIN;
 
     const savedUser = await new userModel(body).save();
     if (!savedUser)
@@ -37,27 +47,29 @@ export const signUp = async (req, res) => {
   }
 };
 
-
 export const login = async (req, res) => {
-  reqInfo(req)
+  reqInfo(req);
   try {
     const { email, password } = req.body;
-    const user = await userModel.findOne({ email, isDeleted: false }).lean();
+
+    const user = await userModel.findOne({ email, isDeleted: false });
     if (!user) {
       return res.status(400).json(new apiResponse(400, "Invalid email", {}, {}));
     }
-    if (user.isBlocked) { return res.status(403).json(new apiResponse(403, 'Your account is blocked', {}, {})); }
 
-    if (password !== user.password) {
-      return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));
+    if (user.isBlocked) {
+      return res.status(403).json(new apiResponse(403, 'Your account is blocked', {}, {}));
     }
 
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));
+    }
 
     const token = jwt.sign(
       {
         _id: user._id,
         role: user.role
-
       },
       JWT_SECRET,
       {}
@@ -72,6 +84,7 @@ export const login = async (req, res) => {
         userType: user.role || "user"
       }
     };
+
     return res.status(200).json(new apiResponse(200, "Login successful", responseData, {}));
   } catch (error) {
     return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError || "Internal server error", {}, error));
@@ -134,56 +147,46 @@ export const verify_otp = async (req, res) => {
     return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError, {}, error));
   }
 };
-
 export const reset_password = async (req, res) => {
-  reqInfo(req)
+  reqInfo(req);
   try {
-    const { email, newPassword } = req.body;
+    const { email, newPassword, confirmPassword } = req.body;
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json(new apiResponse(400, "Passwords do not match", {}, {}));
+    }
 
     const user = await userModel.findOne({ email, isDeleted: false });
-
     if (!user) {
-      return res.status(400).json(new apiResponse(400, "Email not found", {}, {}));
+      return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
     }
 
-    if (user.otpExpireTime && user.otpExpireTime < new Date()) {
-      return res.status(400).json(new apiResponse(400, "OTP has expired", {}, {}));
-    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    await userModel.findByIdAndUpdate(user._id, {
-      password: newPassword,
-      otp: null,
-      otpExpireTime: null
-    });
+    user.password = hashedPassword;
+    user.confirmPassword = req.body.confirmPassword;
 
-    const payload = {
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-      phoneNumber: user.phoneNumber
-    };
+    await user.save();
 
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
-    const userData = {
-      _id: user._id,
-      email: user.email,
-      role: user.role
-    };
-
-    return res.status(200).json(
-      new apiResponse(200, "Password has been reset successfully", { token, user: userData }, {})
-    );
+    return res.status(200).json(new apiResponse(200, "Password reset successfully", {
+      user: {
+        _id: user._id,
+        email: user.email,
+        role: user.role
+      }
+    }, {}));
 
   } catch (error) {
-    console.error("Reset password error:", error);
-    return res.status(500).json(
-      new apiResponse(500, responseMessage?.internalServerError || "Internal Server Error", {}, error)
-    );
+    console.error("Reset Password Error:", error);
+    return res.status(500).json(new apiResponse(500, "Internal server error", {}, error));
   }
 };
 
+
+
+
 export const change_password = async (req, res) => {
-  reqInfo(req)
+  reqInfo(req);
   try {
     const { email, oldPassword, newPassword } = req.body;
 
@@ -192,16 +195,19 @@ export const change_password = async (req, res) => {
       return res.status(404).json({ success: false, message: "Email not found." });
     }
 
-    const isMatch = await bcryptjs.compare(oldPassword, user.password);
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: "Old password is incorrect." });
     }
-    user.password = newPassword;
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+
     await user.save();
 
-    return res.status(200).json(new apiResponse(200, "password changed successfully.", {}, {}));
+    return res.status(200).json(new apiResponse(200, "Password changed successfully.", {}, {}));
   } catch (error) {
-    console.error("Forgot password error:", error);
-    return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError || "internal Server Error", {}, error));
+    console.error("Change password error:", error);
+    return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError || "Internal Server Error", {}, error));
   }
 };
