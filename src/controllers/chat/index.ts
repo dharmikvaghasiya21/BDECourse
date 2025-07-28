@@ -55,9 +55,9 @@ export const delete_chat = async (req, res) => {
   try {
     const { id } = req.body
     await chatModel.findOneAndDelete({ _id: new ObjectId(id) });
-    return res.status(200).json({ success: true, message: "Chat deleted" });
+    return res.status(200).json(new apiResponse(200, "Chat deleted successfully.", {}, {}));
   } catch (error) {
-    return res.status(500).json({ success: false, responseMessage: responseMessage.internalServerError, error });
+    return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
   }
 };
 
@@ -65,8 +65,8 @@ export const block_user = async (req, res) => {
   try {
     const { id } = req.body;
     await studentsModel.findOneAndUpdate({ _id: new ObjectId(id) }, { isBlocked: true });
-    return res.status(200).json({ success: true, message: "User Blocked" });
+    return res.status(200).json(new apiResponse(200, "User blocked successfully.", {}, {}));
   } catch (error) {
-    return res.status(500).json({ success: false, responseMessage: responseMessage.internalServerError, error });
+    return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
   }
 };
