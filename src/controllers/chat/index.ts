@@ -20,34 +20,38 @@ export const send_message = async (req, res) => {
     return res.status(500).json({ success: false, responseMessage: responseMessage.internalServerError, error });
   }
 };
-
-export const get_chat_between_users = async (req, res) => {
-  try {
-    const { senderId, receiverId } = req.query;
-
-    const messages = await chatModel.findOne({
-      $or: [
-        { senderId, receiverId },
-        { senderId: receiverId, receiverId: senderId }
-      ]
-    }).sort({ createdAt: 1 });
-
-    return res.status(200).json({ success: true, messages });
-  } catch (error) {
-    return res.status(500).json({ success: false, responseMessage: responseMessage.internalServerError, error });
-  }
-};
-
 export const get_all_chats = async (req, res) => {
   try {
-    const allChats = await chatModel.findOne()
+    const { user1, admin } = req.query;
+
+    if (!user1 || !admin) {
+      return res.status(400).json({
+        success: false,
+        message: "Both user1 and admin are required."
+      });
+    }
+
+    const allChats = await chatModel.find({
+      $or: [
+        { senderId: user1, receiverId: admin },
+        { senderId: admin, receiverId: user1 }
+      ]
+    })
+      .sort({ createdAt: 1 })
       .populate("senderId", "name role")
       .populate("receiverId", "name role");
+
     return res.status(200).json({ success: true, allChats });
   } catch (error) {
-    return res.status(500).json({ success: false, responseMessage: responseMessage.internalServerError, error });
+    console.error("Get all chats error:", error);
+    return res.status(500).json({
+      success: false,
+      message: responseMessage.internalServerError,
+      error
+    });
   }
 };
+
 
 export const delete_chat = async (req, res) => {
   try {

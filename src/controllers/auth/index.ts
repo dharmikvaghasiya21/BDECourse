@@ -151,7 +151,6 @@ export const reset_password = async (req, res) => {
       return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
     }
 
-    // Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
 
