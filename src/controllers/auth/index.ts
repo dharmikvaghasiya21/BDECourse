@@ -15,9 +15,7 @@ export const signUp = async (req, res) => {
   reqInfo(req)
   try {
     const body = req.body;
-    if (body.password !== body.confirmPassword) {
-      return res.status(400).json(new apiResponse(400, "Passwords do not match", {}, {}));
-    }
+
     let existingUser = await userModel.findOne({ email: body?.email, isDeleted: false });
     if (existingUser)
       return res.status(409).json(new apiResponse(409, responseMessage?.alreadyEmail || "Email already exists", {}, {}));
@@ -26,9 +24,6 @@ export const signUp = async (req, res) => {
     if (existingUser)
       return res.status(409).json(new apiResponse(409, "Phone number already exists", {}, {}));
 
-    if (!body.password || !body.confirmPassword) {
-      return res.status(400).json(new apiResponse(400, "Password and confirm password are required", {}, {}));
-    }
     const salt = await bcrypt.genSalt(10);
     body.password = await bcrypt.hash(body.password, salt);
     body.confirmPassword = body.password;
@@ -145,6 +140,7 @@ export const verify_otp = async (req, res) => {
     return res.status(500).json(new apiResponse(500, responseMessage?.internalServerError, {}, error));
   }
 };
+
 export const reset_password = async (req, res) => {
   reqInfo(req);
   try {
@@ -154,18 +150,29 @@ export const reset_password = async (req, res) => {
     if (!user) {
       return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
     }
-    req.body.confirmPassword = req.body.password;
 
+    // Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
 
     await user.save();
 
+    const token = jwt.sign(
+      {
+        _id: user._id,
+        role: user.role
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     return res.status(200).json(new apiResponse(200, "Password reset successfully", {
+      token,
       user: {
         _id: user._id,
         email: user.email,
-        role: user.role
+        role: user.role,
+        phoneNumber: user.phoneNumber
       }
     }, {}));
 
@@ -174,8 +181,6 @@ export const reset_password = async (req, res) => {
     return res.status(500).json(new apiResponse(500, "Internal server error", {}, error));
   }
 };
-
-
 
 export const change_password = async (req, res) => {
   reqInfo(req);
