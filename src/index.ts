@@ -8,6 +8,7 @@ import { router } from './Routes'
 import path from "path"
 import multer from "multer"
 import fs from 'fs';
+import { initializeSocket } from './helper/socket';
 const app = express();
 
 
@@ -63,5 +64,8 @@ app.get('/isServerUp', (req, res) => {
 app.use(router)
 
 app.use('*', bad_gateway);
-let server = new http.Server(app);
+
+const server = new http.Server(app);
+initializeSocket(server);
+
 export default server;

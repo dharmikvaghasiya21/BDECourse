@@ -99,18 +99,3 @@ export const delete_all_chats = async (req: Request, res: Response) => {
     return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
   }
 };
-
-// export const block_user = async (req, res) => {
-//   reqInfo(req);
-//   try {
-//     const { id } = req.params;
-
-//     const user = await studentsModel.findOneAndUpdate({ _id: new ObjectId(id), isBlocked: false, isDeleted: false },{ isBlocked: true },{ new: true });
-
-//     if (!user) {return res.status(404).json(new apiResponse(404, "User not found or already blocked.", {}, {}));}
-
-//     return res.status(200).json(new apiResponse(200, "User blocked successfully.", { isBlocked: true }, {}));
-//   } catch (error) {
-//     return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
-//   }
-// };
