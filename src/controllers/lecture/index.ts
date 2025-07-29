@@ -9,19 +9,14 @@ export const addLecture = async (req, res) => {
     reqInfo(req);
     try {
         const body = req.body;
-        const user = req.user;
 
         if (!body.courseId) {
             return res.status(400).json(new apiResponse(400, "Course ID is required", {}, {}));
         }
-        body.userIds = [user._id];  // Use array because your schema expects array
-
-        // ✅ Default priority to 0 if not provided
         body.priority = body.priority || 0;
 
-        // ✅ Ensure unique priority within the course
         const isExist = await lectureModel.findOne({
-            courseId: body.id,
+            courseId: body.courseId,
             priority: body.priority,
             isDeleted: false,
         });
@@ -39,6 +34,7 @@ export const addLecture = async (req, res) => {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
+
 
 
 export const editLecture = async (req, res) => {
