@@ -10,27 +10,15 @@ export const addLecture = async (req, res) => {
     try {
         const body = req.body;
 
-        if (!body.courseId) {
-            return res.status(400).json(new apiResponse(400, "Course ID is required", {}, {}));
-        }
+        if (!body.courseId) { return res.status(400).json(new apiResponse(400, "Course ID is required", {}, {})); }
         body.priority = body.priority || 0;
 
-        const isExist = await lectureModel.findOne({
-            courseId: body.courseId,
-            priority: body.priority,
-            isDeleted: false,
-        });
+        const isExist = await lectureModel.findOne({ courseId: body.courseId, priority: body.priority, isDeleted: false, });
 
-        if (isExist) {
-            return res.status(400).json(
-                new apiResponse(400, responseMessage.dataAlreadyExist("priority in this course"), {}, {})
-            );
-        }
-
+        if (isExist) { return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist("priority in this course"), {}, {})); }
         const lecture = await new lectureModel(body).save();
         return res.status(200).json(new apiResponse(200, "Lecture created successfully", lecture, {}));
     } catch (error) {
-        console.error("Add Lecture Error:", error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
@@ -40,21 +28,21 @@ export const addLecture = async (req, res) => {
 export const editLecture = async (req, res) => {
     reqInfo(req);
     try {
-        const { id } = req.body;
-        const body = req.body;
+        const { id, courseId, priority } = req.body;
 
-        let isExist = await lectureModel.findOne({ type: body.type, priority: body.priority, isDeleted: false, _id: { $ne: new ObjectId(body.id) } });
-        if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
+        if (!id || !courseId) { return res.status(400).json(new apiResponse(400, "Lecture ID and Course ID are required", {}, {})); }
 
-        const updated = await lectureModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
+        const isExist = await lectureModel.findOne({ courseId, priority, isDeleted: false, _id: { $ne: new ObjectId(id) }, });
+        if (isExist) { return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist("priority in this course"), {}, {})); }
 
+        const updated = await lectureModel.findOneAndUpdate({ _id: id, isDeleted: false }, req.body, { new: true });
         if (!updated) return res.status(404).json(new apiResponse(404, "Lecture not found", {}, {}));
-
         return res.status(200).json(new apiResponse(200, "Lecture updated", updated, {}));
     } catch (error) {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
+
 
 export const deleteLecture = async (req, res) => {
     reqInfo(req);
