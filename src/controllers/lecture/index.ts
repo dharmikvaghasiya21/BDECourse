@@ -10,7 +10,6 @@ export const addLecture = async (req, res) => {
     try {
         const body = req.body;
         if (!body.courseId) { return res.status(400).json(new apiResponse(400, "Course ID is required", {}, {})); }
-
         body.priority = body.priority || 0;
 
         const isExist = await lectureModel.findOne({ courseId: body.courseId, priority: body.priority, isDeleted: false, });

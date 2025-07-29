@@ -5,7 +5,6 @@ import { reqInfo, responseMessage, sendEmail } from "../../helper";
 import { userModel } from "../../database/models";
 import jwt from "jsonwebtoken";
 
-
 const JWT_SECRET = process.env.JWT_TOKEN_SECRET;
 
 import bcrypt from 'bcrypt';
@@ -39,6 +38,7 @@ export const signUp = async (req, res) => {
   }
 };
 
+
 export const login = async (req, res) => {
   reqInfo(req);
   try {
@@ -52,7 +52,7 @@ export const login = async (req, res) => {
     if (user.isBlocked) {
       return res.status(403).json(new apiResponse(403, 'Your account is blocked', {}, {}));
     }
-
+    
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));

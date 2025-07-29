@@ -9,10 +9,7 @@ export const send_message = async (req, res) => {
   reqInfo(req);
   try {
     const { senderId, receiverId, message } = req.body;
-
-    if (!senderId || !receiverId || !message) {
-      return res.status(400).json({ success: false, message: "Missing fields" });
-    }
+    if (!senderId || !receiverId || !message) { return res.status(400).json({ success: false, message: "Missing fields" }); }
     const chat = await new chatModel({ senderId, receiverId, message, seenBy: [senderId] }).save();
     return res.status(200).json(new apiResponse(200, "Message sent successfully.", { chat }, {}));
   } catch (error) {

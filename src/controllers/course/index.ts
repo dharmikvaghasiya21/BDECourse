@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { courseModel } from "../../database";
 import { apiResponse } from "../../common";
 import { countData, getData, reqInfo, responseMessage } from "../../helper";
-import mongoose from "mongoose";
 
 let ObjectId = require("mongoose").Types.ObjectId;
 
