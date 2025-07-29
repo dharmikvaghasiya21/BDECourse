@@ -72,6 +72,8 @@ export const login = async (req, res) => {
       token,
       user: {
         _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         phoneNumber: user.phoneNumber,
         userType: user.role || "user"
@@ -169,6 +171,8 @@ export const reset_password = async (req, res) => {
       token,
       user: {
         _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         role: user.role,
         phoneNumber: user.phoneNumber
