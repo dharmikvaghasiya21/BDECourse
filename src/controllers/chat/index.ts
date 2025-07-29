@@ -66,16 +66,36 @@ export const get_all_chats = async (req, res) => {
   };
 };
 
-
 export const delete_chat = async (req, res) => {
   reqInfo(req);
   try {
     const { id } = req.params;
-    const deleted = await chatModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, { isDeleted: true }, { new: true });
-    if (!deleted) return res.status(404).json(new apiResponse(404, "Chat not found", {}, {}));
+    if (!ObjectId.isValid(id)) { return res.status(400).json(new apiResponse(400, "Invalid chat message ID", {}, {})); }
+    const deleted = await chatModel.findByIdAndDelete(id);
 
-    return res.status(200).json(new apiResponse(200, "Chat deleted (soft)", deleted, {}));
+    if (!deleted) { return res.status(404).json(new apiResponse(404, "Chat message not found", {}, {})); }
+    return res.status(200).json(new apiResponse(200, "Chat message permanently deleted", deleted, {}));
   } catch (error) {
+    return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
+  }
+};
+
+export const delete_all_chats = async (req: Request, res: Response) => {
+  reqInfo(req);
+  try {
+    const { senderId, receiverId } = req.body;
+    if (!senderId || !receiverId) { return res.status(400).json(new apiResponse(400, "Both senderId and receiverId are required.", {}, {})); }
+    const deleteResult = await chatModel.deleteMany({
+      $or: [
+        { senderId: senderId, receiverId: receiverId },
+        { senderId: receiverId, receiverId: senderId }
+      ]
+    });
+
+    if (deleteResult.deletedCount === 0) { return res.status(404).json(new apiResponse(404, "No chats found to delete.", {}, {})); }
+    return res.status(200).json(new apiResponse(200, "All chats between users deleted successfully.", deleteResult, {}));
+  } catch (error) {
+    console.error("Delete All Chats Error:", error);
     return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
   }
 };

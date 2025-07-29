@@ -9,19 +9,37 @@ export const addLecture = async (req, res) => {
     reqInfo(req);
     try {
         const body = req.body;
+        const user = req.user;
 
-        const user = req.user || req.headers.user;
-        body.userId = user._id;
+        if (!body.courseId) {
+            return res.status(400).json(new apiResponse(400, "Course ID is required", {}, {}));
+        }
+        body.userIds = [user._id];  // Use array because your schema expects array
 
-        let isExist = await lectureModel.findOne({ type: body.type, priority: body.priority, isDeleted: false });
-        if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
+        // ✅ Default priority to 0 if not provided
+        body.priority = body.priority || 0;
+
+        // ✅ Ensure unique priority within the course
+        const isExist = await lectureModel.findOne({
+            courseId: body.id,
+            priority: body.priority,
+            isDeleted: false,
+        });
+
+        if (isExist) {
+            return res.status(400).json(
+                new apiResponse(400, responseMessage.dataAlreadyExist("priority in this course"), {}, {})
+            );
+        }
 
         const lecture = await new lectureModel(body).save();
-        return res.status(200).json(new apiResponse(200, "Lecture created", lecture, {}));
+        return res.status(200).json(new apiResponse(200, "Lecture created successfully", lecture, {}));
     } catch (error) {
+        console.error("Add Lecture Error:", error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
+
 
 export const editLecture = async (req, res) => {
     reqInfo(req);

@@ -5,7 +5,7 @@ const lectureSchema = new mongoose.Schema({
     title: { type: String, required: true },
     thumbnail: { type: String, required: true },
     userIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
-    courseId: { type: mongoose.Schema.Types.ObjectId, ref: "course" },
+    courseId: { type: mongoose.Schema.Types.ObjectId, ref: "course", required: true },
     youtubeLink: { type: String, required: true },
     priority: { type: Number, default: 0 },
     PDF: { type: String },
