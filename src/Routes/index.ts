@@ -30,7 +30,7 @@ router.use('/lecture', lectureRouter);
 router.use('/blog', blogRoutes);
 router.use('/latest-news', latestNewsRoutes);
 router.use('/faq', faqRoutes);
-router.use('/chat', chatRouter);
+router.use('/chat', chatRouter);    
 
 router.use(adminJWT);
 router.use('/upload', uploadRoutes);
