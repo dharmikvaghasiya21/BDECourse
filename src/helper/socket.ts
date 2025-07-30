@@ -10,7 +10,7 @@ export const initializeSocket = (server) => {
   });
 
   io.on('connection', (socket) => {
-    console.log('🔌 Connected:', socket.id);
+    console.log('Connected:', socket.id);
 
     socket.on('join', (userId) => {
       socket.join(userId);
@@ -24,9 +24,7 @@ export const initializeSocket = (server) => {
         io.to(receiverId).emit('receive_message', newMsg);
 
         const unreadCount = await chatModel.countDocuments({
-          receiverId,
-          seen: false,
-          isDeleted: { $ne: true },
+          receiverId, seen: false, isDeleted: { $ne: true },
         });
         io.to(receiverId).emit('unread_count', { count: unreadCount });
       } catch (err) {
@@ -36,7 +34,7 @@ export const initializeSocket = (server) => {
 
     socket.on('edit_message', async ({ messageId, newMessage }) => {
       try {
-        const updated = await chatModel.findByIdAndUpdate(
+        const updated = await chatModel.findOneAndUpdate(
           messageId,
           { message: newMessage },
           { new: true }
@@ -51,17 +49,15 @@ export const initializeSocket = (server) => {
       if (!ObjectId)
         return socket.emit('message_deleted_error', { message: 'Invalid ID' });
 
-      const deleted = await chatModel.findByIdAndUpdate(messageId, { isDeleted: true });
+      const deleted = await chatModel.findOneAndUpdate(messageId, { isDeleted: true });
       socket.emit('message_deleted_error', !deleted ? { message: 'Not found' } : null);
       if (deleted) io.emit('message_deleted', { messageId });
     });
 
-
-
     socket.on('get_all_chats', async ({ senderId, receiverId }) => {
       try {
         if (!senderId || !receiverId) {
-          return socket.emit('get_all_chats_error', { message: 'senderId અને receiverId જરૂરી છે' });
+          return socket.emit('get_all_chats_error', { message: 'senderId and receiverId is required' });
         }
 
         const allChats = await chatModel.find({
@@ -99,6 +95,21 @@ export const initializeSocket = (server) => {
         console.error("Error in delete_conversation:", err);
       }
     });
+
+    socket.on('get_unread_count', async ({ receiverId }) => {
+      try {
+        const count = await chatModel.countDocuments({
+          receiverId,
+          seen: false,
+          isDeleted: { $ne: true },
+        });
+
+        io.to(receiverId).emit('unread_count', { count });
+      } catch (err) {
+        console.error("Error in get_unread_count:", err);
+      }
+    });
+
 
     socket.on('mark_seen', async ({ senderId, receiverId }) => {
       try {

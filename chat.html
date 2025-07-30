@@ -1,158 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <title>Student-Teacher Chat API Tester</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 20px;
-    }
-
-    input,
-    textarea,
-    button {
-      margin: 5px 0;
-      padding: 8px;
-      width: 100%;
-    }
-
-    .section {
-      border: 1px solid #ccc;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-    }
-
-    pre {
-      background: #f5f5f5;
-      padding: 10px;
-      overflow: auto;
-      max-height: 300px;
-    }
-
-    h2 {
-      color: #333;
-    }
-
-    button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Chat App</title>
 </head>
-
 <body>
-  <h2>📚 Student-Teacher Chat API Tester</h2>
+  <h2>Real-time Chat</h2>
 
-  <!-- 1. Send Chat Message -->
-  <div class="section">
-    <h3>1️⃣ Send Chat Message</h3>
-    <input type="text" id="sendSenderId" placeholder="Sender ID" />
-    <input type="text" id="sendReceiverId" placeholder="Receiver ID" />
-    <textarea id="messageContent" placeholder="Type message here..."></textarea>
-    <button onclick="sendMessage()">Send Message</button>
-    <pre id="sendResult"></pre>
-  </div>
+  <label>Sender ID: <input id="senderId" placeholder="Sender ObjectId" /></label><br />
+  <label>Receiver ID: <input id="receiverId" placeholder="Receiver ObjectId" /></label><br />
+  <label>Message: <input id="message" placeholder="Type message" /></label><br />
+  <button onclick="sendMessage()">Send Message</button>
+  <button onclick="markAsSeen()">Mark as Seen</button>
 
-  <!-- 2. Get Chat Between Users -->
-  <div class="section">
-    <h3>2️⃣ Get Chat Between Two Users</h3>
-    <input type="text" id="senderId" placeholder="Sender ID" />
-    <input type="text" id="receiverId" placeholder="Receiver ID" />
-    <button onclick="getChatBetweenUsers()">Fetch Chat</button>
-    <pre id="chatResult"></pre>
-  </div>
+  <h3>Unread Count: <span id="unreadCount">0</span></h3>
 
-  <!-- 3. Get All Chats -->
-  <div class="section">
-    <h3>3️⃣ Get All Chats</h3>
-    <button onclick="getAllChats()">Fetch All Chats</button>
-    <pre id="allChatsResult"></pre>
-  </div>
+  <h3>Chat History</h3>
+  <ul id="chatBox"></ul>
 
-  <!-- 4. Delete Chat -->
-  <div class="section">
-    <h3>4️⃣ Delete Chat by Chat ID</h3>
-    <input type="text" id="chatId" placeholder="Chat ID" />
-    <button onclick="deleteChat()">Delete Chat</button>
-    <pre id="deleteResult"></pre>
-  </div>
-
-  <!-- 5. Block User -->
-  <div class="section">
-    <h3>5️⃣ Block User</h3>
-    <input type="text" id="blockUserId" placeholder="User ID to Block" />
-    <button onclick="blockUser()">Block User</button>
-    <pre id="blockResult"></pre>
-  </div>
-
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   <script>
-    const API_BASE = "http://localhost:2222";
+    const socket = io('http://localhost:2222');
 
-    async function sendMessage() {
-      const senderId = document.getElementById("sendSenderId").value;
-      const receiverId = document.getElementById("sendReceiverId").value;
-      const message = document.getElementById("messageContent").value;
+    const senderInput = document.getElementById('senderId');
+    const receiverInput = document.getElementById('receiverId');
+    const messageInput = document.getElementById('message');
+    const chatBox = document.getElementById('chatBox');
+    const unreadCountSpan = document.getElementById('unreadCount');
 
-      const res = await fetch(`${API_BASE}/chat/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ senderId, receiverId, message }),
+    senderInput.addEventListener('blur', () => {
+      const userId = senderInput.value;
+      if (userId) {
+        socket.emit('join', userId);
+        socket.emit('get_unread_count', { receiverId: userId });
+        loadChats();
+      }
+    });
+
+    receiverInput.addEventListener('blur', loadChats);
+
+    function sendMessage() {
+      const senderId = senderInput.value.trim();
+      const receiverId = receiverInput.value.trim();
+      const message = messageInput.value.trim();
+      if (!senderId || !receiverId || !message) return alert('All fields are required');
+      socket.emit('send_message', { senderId, receiverId, message });
+      messageInput.value = '';
+    }
+
+    function markAsSeen() {
+      const senderId = receiverInput.value.trim();
+      const receiverId = senderInput.value.trim();
+      if (!senderId || !receiverId) return;
+      socket.emit('mark_seen', { senderId, receiverId });
+    }
+
+    function loadChats() {
+      const senderId = senderInput.value.trim();
+      const receiverId = receiverInput.value.trim();
+      if (!senderId || !receiverId) return;
+      socket.emit('get_all_chats', { senderId, receiverId });
+    }
+
+    socket.on('receive_message', (msg) => {
+      const li = document.createElement('li');
+      li.textContent = `[${msg.senderId}] ➡ [${msg.receiverId}]: ${msg.message}`;
+      chatBox.appendChild(li);
+    });
+
+    socket.on('get_all_chats_response', (chats) => {
+      chatBox.innerHTML = '';
+      chats.forEach((msg) => {
+        const li = document.createElement('li');
+        li.textContent = `[${msg.senderId}] ➡ [${msg.receiverId}]: ${msg.message}`;
+        chatBox.appendChild(li);
       });
+    });
 
-      const data = await res.json();
-      document.getElementById("sendResult").textContent = JSON.stringify(data, null, 2);
-    }
-    
-    async function getChatBetweenUsers() {
-      const senderId = document.getElementById("senderId").value;
-      const receiverId = document.getElementById("receiverId").value;
+    socket.on('unread_count', ({ count }) => {
+      unreadCountSpan.textContent = count;
+    });
 
-      const res = await fetch(`${API_BASE}/chat/get?senderId=${senderId}&receiverId=${receiverId}`);
-      const data = await res.json();
-      document.getElementById("chatResult").textContent = JSON.stringify(data, null, 2);
-    }
-
-    async function getAllChats() {
-      const res = await fetch(`${API_BASE}/chat/getall`);
-      const data = await res.json();
-      document.getElementById("allChatsResult").textContent = JSON.stringify(data, null, 2);
-    }
-
-    async function deleteChat() {
-      const chatId = document.getElementById("chatId").value;
-
-      const res = await fetch(`${API_BASE}/chat/delete`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chatId }),
-      });
-
-      const data = await res.json();
-      document.getElementById("deleteResult").textContent = JSON.stringify(data, null, 2);
-    }
-
-    async function blockUser() {
-      const userId = document.getElementById("blockUserId").value;
-
-      const res = await fetch(`${API_BASE}/chat/block`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
-
-      const data = await res.json();
-      document.getElementById("blockResult").textContent = JSON.stringify(data, null, 2);
-    }
+    socket.on('messages_seen', ({ receiverId }) => {
+      console.log(`Messages seen by ${receiverId}`);
+    });
   </script>
 </body>
-
 </html>
