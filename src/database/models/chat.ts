@@ -6,7 +6,7 @@ const chatSchema = new mongoose.Schema({
     message: { type: String, required: true },
     seen: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false }
-    
+
 }, { timestamps: true, versionKey: false });
 
 export const chatModel = mongoose.model("chat", chatSchema)

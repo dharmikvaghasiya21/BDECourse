@@ -9,5 +9,5 @@ export * as termsConditionController from "./terms-condition";
 export * as blogController from "./blog";
 export * as latestNewsController from "./latestNews";
 export * as userController from "./user";
-export * as chatController from "./chat";
+// export * as chatController from "./chat";
 export * as lectureController from "./lecture";

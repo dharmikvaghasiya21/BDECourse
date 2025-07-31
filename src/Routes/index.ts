@@ -4,7 +4,7 @@ import userRouter from './user'
 import bannerRouter from './banner'
 import categoryRouter from './category'
 import courseRouter from './course'
-import chatRouter from './chat'
+// import chatRouter from './chat'
 import { aboutUsRoutes } from './about-us'
 import { privacyPolicyRoutes } from './privacy-policy'
 import { termsConditionRoutes } from './terms-condition'
@@ -30,7 +30,7 @@ router.use('/lecture', lectureRouter);
 router.use('/blog', blogRoutes);
 router.use('/latest-news', latestNewsRoutes);
 router.use('/faq', faqRoutes);
-router.use('/chat', chatRouter);    
+// router.use('/chat', chatRouter);    
 
 router.use(adminJWT);
 router.use('/upload', uploadRoutes);

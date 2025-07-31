@@ -177,7 +177,7 @@ export const initializeSocket = (server) => {
                 { senderId: userObjectId },
                 { receiverId: userObjectId }
               ],
-              isDeleted: { $ne: true }
+              isDeleted: { $ne: true },
             }
           },
           {
@@ -208,6 +208,12 @@ export const initializeSocket = (server) => {
             }
           },
           { $unwind: '$userInfo' },
+          {
+            $match: {
+              'userInfo.isBlocked': { $ne: true },
+              'userInfo.isDeleted': { $ne: true }
+            }
+          },
           {
             $lookup: {
               from: 'chats',
@@ -245,6 +251,7 @@ export const initializeSocket = (server) => {
               },
               image: '$userInfo.image',
               role: '$userInfo.role',
+              isBlock: '$userInfo.isBlock',
               lastMessage: 1,
               lastMessageTime: 1,
               unreadCount: 1
@@ -269,6 +276,7 @@ export const initializeSocket = (server) => {
             {
               $match: {
                 isDeleted: false,
+                isBlocked: false,
                 // role: ADMIN_ROLES.USER,
                 _id: { $ne: userObjectId },
                 $or: [
@@ -345,6 +353,7 @@ export const initializeSocket = (server) => {
                 name: { $concat: ['$firstName', ' ', '$lastName'] },
                 image: 1,
                 role: 1,
+                isBlock: 1,
                 unreadCount: 1,
                 lastMessage: 1,
                 lastMessageTime: 1
