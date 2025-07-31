@@ -13,7 +13,6 @@ export const addLecture = async (req, res) => {
         body.priority = body.priority || 0;
 
         const isExist = await lectureModel.findOne({ courseId: body.courseId, priority: body.priority, isDeleted: false, });
-
         if (isExist) { return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist("priority in this course"), {}, {})); }
         const lecture = await new lectureModel(body).save();
         return res.status(200).json(new apiResponse(200, "Lecture created successfully", lecture, {}));

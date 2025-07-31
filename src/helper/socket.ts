@@ -12,8 +12,9 @@ export const initializeSocket = (server) => {
   });
 
   io.on('connection', (socket) => {
-
+    console.log("connected")
     socket.on('join', (userId) => {
+      console.log("join",userId)
       socket.join(userId);
     });
 
