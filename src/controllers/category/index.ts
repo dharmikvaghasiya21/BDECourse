@@ -8,7 +8,6 @@ export const addCategory = async (req, res) => {
     reqInfo(req);
     try {
         const body = req.body;
-
         let isExist = await categoryModel.findOne({ type: body.type, priority: body.priority, isDeleted: false });
         if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
 
