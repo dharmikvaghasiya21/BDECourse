@@ -107,12 +107,10 @@ export const get_all_users = async (req, res) => {
     let loggedInUser: any = req.headers?.user;
 
     try {
-        if (blockFilter === 'block') {
-            criteria.isBlocked = true;
-        } else if (blockFilter === 'unblock') {
-            criteria.isBlocked = false;
-        }
-
+        
+        let isBlocked = blockFilter === "block" ? true : false 
+        if(blockFilter) criteria.isBlocked = isBlocked;
+        
         if (role === 'user') {
             criteria.role = USER_ROLE.USER;
         } else {

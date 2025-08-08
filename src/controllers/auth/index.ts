@@ -13,10 +13,9 @@ export const signUp = async (req, res) => {
   reqInfo(req)
   try {
     const body = req.body;
-
     let existingUser = await userModel.findOne({ email: body?.email, isDeleted: false });
     if (existingUser)
-      return res.status(409).json(new apiResponse(409, responseMessage?.alreadyEmail || "Email already exists", {}, {}));
+      return res.status(409).json(new apiResponse(409, responseMessage?.alreadyEmail || "Email already exists",{}, {}));
 
     existingUser = await userModel.findOne({ phoneNumber: body?.phoneNumber, isDeleted: false });
     if (existingUser)
@@ -52,7 +51,7 @@ export const login = async (req, res) => {
     if (user.isBlocked) {
       return res.status(403).json(new apiResponse(403, 'Your account is blocked', {}, {}));
     }
-    
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(400).json(new apiResponse(400, "Invalid password", {}, {}));

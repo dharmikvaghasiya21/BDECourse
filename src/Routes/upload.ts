@@ -33,7 +33,6 @@ router.post('', async (req: any, res: any) => {
 
             fileUrl = config.BACKEND_URL + `/pdf/${file.filename}`;
         }
-
         return res.status(200).json(new apiResponse(200, responseMessage.addDataSuccess("File"), fileUrl, {}));
     } catch (error) {
         console.log("error =>", error);

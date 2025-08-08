@@ -24,8 +24,8 @@ export const editCategory = async (req, res) => {
         const { id } = req.body;
         const body = req.body;
 
-            let isExist = await categoryModel.findOne({ type: body.type, priority: body.priority, isDeleted: false, _id: { $ne: new ObjectId(body.id) } });
-            if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
+        let isExist = await categoryModel.findOne({ type: body.type, priority: body.priority, isDeleted: false, _id: { $ne: new ObjectId(body.id) } });
+        if (isExist) return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist('priority'), {}, {}));
 
         const updated = await categoryModel.findOneAndUpdate({ _id: new ObjectId(id), isDeleted: false }, body, { new: true });
 
