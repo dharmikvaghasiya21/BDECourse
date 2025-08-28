@@ -45,8 +45,11 @@ export const editBanner = async (req, res) => {
 export const getAllBanner = async (req, res) => {
   reqInfo(req);
   try {
-    let { type, search, page, limit } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
+    let { type, search, page, limit, activeFilter } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
     if (type) criteria.type = type;
+
+    if (activeFilter) criteria.active = activeFilter;
+
     if (search) {
       criteria.title = { $regex: search, $options: 'si' };
     }

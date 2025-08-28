@@ -2,7 +2,7 @@ import { required } from "joi";
 import mongoose from "mongoose";
 
 const bannerSchema = new mongoose.Schema({
-    title: { type: String, required: true },
+    title: { type: String },
     image: { type: String, required: true },
     youtubeLink: { type: String},
     action: { type: Boolean, default: false },
