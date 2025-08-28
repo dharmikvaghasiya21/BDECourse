@@ -41,7 +41,7 @@ export const add_user = async (req, res) => {
         console.error("Add User Error:", error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
-};
+};   
 
 export const edit_user_by_id = async (req, res) => {
     reqInfo(req);
