@@ -26,15 +26,18 @@ export const addCourse = async (req, res) => {
 export const getAllCourses = async (req, res) => {
     reqInfo(req);
     try {
-        let { type, search, page, limit, featureFilter, actionFilter } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
+        let { type, search, page, limit, featureFilter, actionFilter, lockFilter } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
         if (type) criteria.type = type;
 
         if (featureFilter) criteria.feature = featureFilter;
         if (actionFilter) criteria.action = actionFilter;
+        if (lockFilter) criteria.locked = lockFilter;
+
 
         if (search) {
             criteria.title = { $regex: search, $options: 'si' };
         }
+
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 1;
 
