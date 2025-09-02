@@ -35,11 +35,10 @@ export const getAllCourses = async (req, res) => {
         if (featureFilter) criteria.feature = featureFilter;
         if (actionFilter) criteria.action = actionFilter;
 
+        // ✅ userId select થાય એટલે locked:true filter add કરો
         if (userId) {
-            criteria.$or = [
-                { userIds: new mongoose.Types.ObjectId(userId) },
-                { locked: true }
-            ];
+            criteria.userIds = new mongoose.Types.ObjectId(userId);
+            criteria.locked = true;
         }
 
         if (search) {
@@ -79,6 +78,7 @@ export const getAllCourses = async (req, res) => {
             .json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
+
 
 export const getCourseById = async (req, res) => {
     reqInfo(req);
