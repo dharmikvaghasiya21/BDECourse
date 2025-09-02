@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { courseModel } from "../../database";
 import { apiResponse } from "../../common";
 import { countData, getData, reqInfo, responseMessage } from "../../helper";
+import mongoose from "mongoose";
 
 let ObjectId = require("mongoose").Types.ObjectId;
 
@@ -26,27 +27,36 @@ export const addCourse = async (req, res) => {
 export const getAllCourses = async (req, res) => {
     reqInfo(req);
     try {
-        let { type, search, page, limit, featureFilter, actionFilter, lockFilter } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
-        if (type) criteria.type = type;
+        let { type, search, page, limit, featureFilter, actionFilter, userId } = req.query,
+            options: any = { lean: true },
+            criteria: any = { isDeleted: false };
 
+        if (type) criteria.type = type;
         if (featureFilter) criteria.feature = featureFilter;
         if (actionFilter) criteria.action = actionFilter;
-        if (lockFilter) criteria.locked = lockFilter;
 
+        // 🟢 User wise lock filter logic
+        if (userId) {
+            // જો user select કર્યો હોય → એ user ના courses locked=true
+            criteria.$or = [
+                { userIds: new mongoose.Types.ObjectId(userId) }, // selected user courses
+                { locked: true } // other locked courses
+            ];
+        }
 
         if (search) {
-            criteria.title = { $regex: search, $options: 'si' };
+            criteria.name = { $regex: search, $options: "si" };
         }
 
         const pageNum = parseInt(page) || 1;
-        const limitNum = parseInt(limit) || 1;
+        const limitNum = parseInt(limit) || 10;
 
         if (page && limit) {
-            options.skip = (parseInt(page) - 1) * parseInt(limit);
-            options.limit = parseInt(limit);
+            options.skip = (pageNum - 1) * limitNum;
+            options.limit = limitNum;
             options.sort = { createdAt: -1 };
-
         }
+
         const response = await getData(courseModel, criteria, {}, options);
         const totalCount = await countData(courseModel, criteria);
 
@@ -56,13 +66,22 @@ export const getAllCourses = async (req, res) => {
             page_limit: Math.ceil(totalCount / limitNum) || 1,
         };
 
-        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess('courses fetched'),
-            { course_data: response, totalData: totalCount, state: stateObj }, {}));
+        return res.status(200).json(
+            new apiResponse(
+                200,
+                responseMessage.getDataSuccess("courses fetched"),
+                { course_data: response, totalData: totalCount, state: stateObj },
+                {}
+            )
+        );
     } catch (error) {
         console.log(error);
-        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
+        return res
+            .status(500)
+            .json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
+
 
 
 export const getCourseById = async (req, res) => {
