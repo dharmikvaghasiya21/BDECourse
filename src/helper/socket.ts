@@ -14,7 +14,7 @@ export const initializeSocket = (server) => {
   io.on('connection', (socket) => {
     console.log("connected")
     socket.on('join', (userId) => {
-      console.log("join",userId)
+      console.log("join", userId)
       socket.join(userId);
     });
 
@@ -33,6 +33,32 @@ export const initializeSocket = (server) => {
         console.error(" Error in send_message:", err);
       }
     });
+    
+    socket.on('all_admin_show', async ({ receiverId }) => {
+      try {
+        // Find all admin users
+        const admins = await userModel.find(
+          { role: { $in: ADMIN_ROLES }, isDeleted: false, isBlocked: false },
+          { firstName: 1, lastName: 1, image: 1, role: 1 }
+        );
+
+        // Format data
+        const formattedAdmins = admins.map((admin) => ({
+          _id: admin._id,
+          name: `${admin.firstName} ${admin.lastName}`,
+          image: admin.image,
+          role: admin.role,
+        }));
+
+        // Send admin list to specific user (receiverId)
+        io.to(receiverId).emit('all_admin_list', formattedAdmins);
+
+      } catch (err) {
+        console.error("Error in all_admin_show:", err);
+        socket.emit('all_admin_show_error', { message: 'Internal error', error: err.message });
+      }
+    });
+
 
     socket.on('edit_message', async ({ messageId, newMessage }) => {
       try {

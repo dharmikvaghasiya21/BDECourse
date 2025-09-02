@@ -161,8 +161,6 @@ export const get_all_users = async (req, res) => {
     }
 };
 
-
-
 export const get_user_by_id = async (req, res) => {
     reqInfo(req);
     try {
