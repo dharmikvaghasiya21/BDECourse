@@ -297,19 +297,14 @@ export const initializeSocket = (server) => {
     socket.on('search_users', async ({ senderId, search }) => {
       try {
         const userObjectId = new ObjectId(senderId);
-        const searchRegex = search ? new RegExp(search, 'si') : null;
         if (search) {
           const users = await userModel.aggregate([
             {
               $match: {
                 isDeleted: false,
                 isBlocked: false,
-                // role: ADMIN_ROLES.USER,
+                role: ADMIN_ROLES.ADMIN,
                 _id: { $ne: userObjectId },
-                $or: [
-                  { firstName: { $regex: searchRegex } },
-                  { lastName: { $regex: searchRegex } }
-                ]
               }
             },
             {

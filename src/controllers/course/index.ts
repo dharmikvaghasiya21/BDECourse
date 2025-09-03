@@ -36,16 +36,13 @@ export const getAllCourses = async (req, res) => {
         if (actionFilter) criteria.action = actionFilter;
 
         if (userId) {
-            criteria.userIds = new mongoose.Types.ObjectId(userId);
-            criteria.locked = false;
-        } else {
-            criteria.locked = true;
+            criteria.$or = [{ userIds: { $in: [new ObjectId(userId)] }, locked: true }, { locked: false }];
         }
 
         if (search) {
             criteria.name = { $regex: search, $options: "si" };
         }
-
+        
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 10;
 
