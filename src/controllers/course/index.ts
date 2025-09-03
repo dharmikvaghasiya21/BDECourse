@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { courseModel } from "../../database";
 import { apiResponse } from "../../common";
 import { countData, getData, reqInfo, responseMessage } from "../../helper";
+import { features } from "process";
 
 let ObjectId = require("mongoose").Types.ObjectId;
 export const addCourse = async (req, res) => {
@@ -113,13 +114,16 @@ export const getPurchasedCourses = async (req, res) => {
     reqInfo(req);
     let { user } = req.headers;
     try {
-
+        // console.log("action", action);
+        // console.log("feature", features);
         const courses = await courseModel.find({
-            featured: true,
+            feature: true,
             action: true,
             userIds: { $in: [new ObjectId(user._id)] },
             isDeleted: false,
         });
+        console.log("Purchased courses", courses);
+
         return res.status(200).json(new apiResponse(200, "Purchased courses fetched", courses, {}));
     } catch (error) {
         console.log(error);
@@ -131,8 +135,9 @@ export const getUnpurchasedCourses = async (req, res) => {
     reqInfo(req);
     try {
         let { user } = req.headers;
-
         const courses = await courseModel.find({
+            feature: true,
+            action: true,
             userIds: { $nin: [new ObjectId(user._id)] },
             isDeleted: false,
         });
