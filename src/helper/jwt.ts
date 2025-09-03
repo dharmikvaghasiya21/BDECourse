@@ -18,7 +18,6 @@ export const adminJWT = async (req, res, next) => {
 
             if (result?.isBlocked == true) return res.status(410).json(new apiResponse(410, responseMessage?.accountBlock, {}, {}));
             if (result?.isDeleted == false) {
-                console.log("result => ",result)
                 req.headers.user = result
                 return next()
             } else {

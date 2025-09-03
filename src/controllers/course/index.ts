@@ -113,15 +113,10 @@ export const getPurchasedCourses = async (req, res) => {
     reqInfo(req);
     let { user } = req.headers;
     try {
-        let { featureFilter, actionFilter } = req.query;
-        let criteria: any = { isDeleted: false };
-
-        if (featureFilter === "true") criteria.feature = true;
-        if (featureFilter === "false") criteria.feature = false;
-        if (actionFilter === "true") criteria.action = true;
-        if (actionFilter === "false") criteria.action = false;
 
         const courses = await courseModel.find({
+            featured: true,
+            action: true,
             userIds: { $in: [new ObjectId(user._id)] },
             isDeleted: false,
         });
@@ -137,14 +132,6 @@ export const getUnpurchasedCourses = async (req, res) => {
     try {
         let { user } = req.headers;
 
-        let { featureFilter, actionFilter } = req.query;
-        let criteria: any = { isDeleted: false };
-
-        if (featureFilter === "true") criteria.feature = true;
-        if (featureFilter === "false") criteria.feature = false;
-        if (actionFilter === "true") criteria.action = true;
-        if (actionFilter === "false") criteria.action = false;
-        
         const courses = await courseModel.find({
             userIds: { $nin: [new ObjectId(user._id)] },
             isDeleted: false,
