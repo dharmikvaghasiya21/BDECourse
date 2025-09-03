@@ -2,10 +2,8 @@ import { Request, Response } from "express";
 import { courseModel } from "../../database";
 import { apiResponse } from "../../common";
 import { countData, getData, reqInfo, responseMessage } from "../../helper";
-import mongoose from "mongoose";
 
 let ObjectId = require("mongoose").Types.ObjectId;
-
 export const addCourse = async (req, res) => {
     reqInfo(req);
     try {
@@ -42,7 +40,7 @@ export const getAllCourses = async (req, res) => {
         if (search) {
             criteria.name = { $regex: search, $options: "si" };
         }
-        
+
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 10;
 
@@ -85,6 +83,7 @@ export const getCourseById = async (req, res) => {
         if (!course) return res.status(404).json(new apiResponse(404, "Course not found", {}, {}));
         return res.status(200).json(new apiResponse(200, "Course fetched", course, {}));
     } catch (error) {
+        console.log(error)
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
@@ -114,6 +113,37 @@ export const deleteCourse = async (req, res) => {
         if (!deleted) return res.status(404).json(new apiResponse(404, "Course not found", {}, {}));
         return res.status(200).json(new apiResponse(200, "Course deleted (soft delete)", deleted, {}));
     } catch (error) {
+        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
+    }
+};
+
+export const getPurchasedCourses = async (req, res) => {
+    reqInfo(req);
+    let { user } = req.headers
+    try {
+        const courses = await courseModel.find({
+            userIds: { $in: [new ObjectId(user._id)] },
+            isDeleted: false
+        });
+        return res.status(200).json(new apiResponse(200, "Purchased courses fetched", courses, {}));
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
+    }
+};
+
+export const getUnpurchasedCourses = async (req, res) => {
+    reqInfo(req);
+    try {
+        let { user } = req.headers;
+
+        const courses = await courseModel.find({
+            userIds: { $nin: [new ObjectId(user._id)] },
+            isDeleted: false
+        });
+        return res.status(200).json(new apiResponse(200, "Unpurchased courses fetched", courses, {}));
+    } catch (error) {
+        console.log(error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
