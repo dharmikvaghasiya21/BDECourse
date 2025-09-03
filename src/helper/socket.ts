@@ -138,7 +138,17 @@ export const initializeSocket = (server) => {
       }
     });
 
-
+    socket.on("get_admin", async ({ senderId }) => {
+      try {
+        const users = await userModel.find({
+          role: "admin",
+          isDeleted: false,
+        });
+        io.to(senderId).emit("get_admin_all", { users });
+      } catch (err) {
+        console.error("Error in get_unread_count:", err);
+      }
+    });
 
     socket.on('get_unread_count', async ({ receiverId }) => {
       try {
@@ -297,14 +307,18 @@ export const initializeSocket = (server) => {
     socket.on('search_users', async ({ senderId, search }) => {
       try {
         const userObjectId = new ObjectId(senderId);
+        const searchRegex = search ? new RegExp(search, 'si') : null;
         if (search) {
           const users = await userModel.aggregate([
             {
               $match: {
                 isDeleted: false,
-                isBlocked: false,
-                role: ADMIN_ROLES.ADMIN,
+                // role: ADMIN_ROLES.USER,
                 _id: { $ne: userObjectId },
+                $or: [
+                  { firstName: { $regex: searchRegex } },
+                  { lastName: { $regex: searchRegex } }
+                ]
               }
             },
             {
