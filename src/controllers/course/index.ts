@@ -29,9 +29,9 @@ export const getAllCourses = async (req, res) => {
             options: any = { lean: true },
             criteria: any = { isDeleted: false };
 
-        if (type) criteria.type = type;
-        if (featureFilter) criteria.feature = featureFilter;
-        if (actionFilter) criteria.action = actionFilter;
+        if (featureFilter !== undefined) criteria.feature = featureFilter === "true";
+        if (actionFilter !== undefined) criteria.action = actionFilter === "true";
+
 
         if (userId) {
             criteria.$or = [{ userIds: { $in: [new ObjectId(userId)] }, locked: true }, { locked: false }];
@@ -116,10 +116,8 @@ export const getPurchasedCourses = async (req, res) => {
         let { featureFilter, actionFilter } = req.query;
         let criteria: any = { isDeleted: false };
 
-        if (featureFilter === true) criteria.feature = true;
-        if (featureFilter === false) criteria.feature = false;
-        if (actionFilter === true) criteria.action = true;
-        if (actionFilter === false) criteria.action = false;
+        if (featureFilter !== undefined) criteria.feature = featureFilter === "true";
+        if (actionFilter !== undefined) criteria.action = actionFilter === "true";
 
         const courses = await courseModel.find({
             userIds: { $in: [new ObjectId(user._id)] },
@@ -140,11 +138,8 @@ export const getUnpurchasedCourses = async (req, res) => {
         let { featureFilter, actionFilter } = req.query;
         let criteria: any = { isDeleted: false };
 
-
-        if (featureFilter === true) criteria.feature = true;
-        if (featureFilter === false) criteria.feature = false;
-        if (actionFilter === true) criteria.action = true;
-        if (actionFilter === false) criteria.action = false;
+        if (featureFilter !== undefined) criteria.feature = featureFilter === "true";
+        if (actionFilter !== undefined) criteria.action = actionFilter === "true";
 
         const courses = await courseModel.find({
             userIds: { $nin: [new ObjectId(user._id)] },
