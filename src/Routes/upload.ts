@@ -15,7 +15,6 @@ router.post('', async (req: any, res: any) => {
         if (!req.files || (!req.files.image && !req.files.pdf)) {
             return res.status(400).json({ message: "No file uploaded or invalid file type." });
         }
-
         let fileUrl;
         if (req.files.image) {
             const file = req.files.image[0]; // First image file
@@ -67,7 +66,6 @@ router.delete("/", (req: any, res: any) => {
         if (!fs.existsSync(filePath)) {
             return res.status(404).json(new apiResponse(404, "File not found", {}, {}));
         }
-
         fs.unlinkSync(filePath);
 
         return res.status(200).json(new apiResponse(200, "File deleted successfully", {}, {}));
