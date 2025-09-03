@@ -140,9 +140,11 @@ export const getUnpurchasedCourses = async (req, res) => {
         let { featureFilter, actionFilter } = req.query;
         let criteria: any = { isDeleted: false };
 
-        if (featureFilter !== undefined) criteria.feature = featureFilter === "true";
-        if (actionFilter !== undefined) criteria.action = actionFilter === "true";
-
+        if (featureFilter === "true") criteria.feature = true;
+        if (featureFilter === "false") criteria.feature = false;
+        if (actionFilter === "true") criteria.action = true;
+        if (actionFilter === "false") criteria.action = false;
+        
         const courses = await courseModel.find({
             userIds: { $nin: [new ObjectId(user._id)] },
             isDeleted: false,
