@@ -141,7 +141,6 @@ export const getUnpurchasedCourses = async (req, res) => {
             userIds: { $nin: [new ObjectId(user._id)] },
             isDeleted: false,
         });
-
         return res.status(200).json(new apiResponse(200, "Unpurchased courses fetched", courses, {}));
     } catch (error) {
         console.log(error);
