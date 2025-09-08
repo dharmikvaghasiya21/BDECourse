@@ -1,10 +1,8 @@
 import { IdentityStore } from 'aws-sdk';
 import { ADMIN_ROLES, USER_ROLE, apiResponse } from '../../common';
-import { chatModel, userModel } from '../../database';
-import { countData, getData, reqInfo, responseMessage } from '../../helper';
+import { chatModel, courseModel, userModel } from '../../database';
+import { countData, findAllWithPopulate, getData, reqInfo, responseMessage } from '../../helper';
 import bcrypt from 'bcryptjs';
-import c from 'config';
-import { roleModel } from '../../database/models/role';
 
 let ObjectId = require("mongoose").Types.ObjectId;
 
@@ -30,16 +28,24 @@ export const add_user = async (req, res) => {
         body.role = USER_ROLE.USER;
 
         const user = await new userModel(body).save();
-        console.log("User added successfully:", user);
         if (!user)
             return res.status(500).json(new apiResponse(500, responseMessage.addDataError, {}, {}));
+
+
+        if (body.courseIds && body.courseIds.length > 0) {
+            await courseModel.updateMany(
+                { _id: { $in: body.courseIds } },
+                { $push: { userIds: user._id } }
+            );
+        }
 
         return res.status(200).json(new apiResponse(200, responseMessage.addDataSuccess("user"), user, {}));
     } catch (error) {
         console.error("Add User Error:", error);
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
-};   
+};
+
 
 export const edit_user_by_id = async (req, res) => {
     reqInfo(req);
@@ -105,10 +111,10 @@ export const get_all_users = async (req, res) => {
     let loggedInUser: any = req.headers?.user;
 
     try {
-        
-        let isBlocked = blockFilter === "block" ? true : false 
-        if(blockFilter) criteria.isBlocked = isBlocked;
-        
+
+        let isBlocked = blockFilter === "block" ? true : false
+        if (blockFilter) criteria.isBlocked = isBlocked;
+
         if (role === 'user') {
             criteria.role = USER_ROLE.USER;
         } else {
@@ -129,10 +135,15 @@ export const get_all_users = async (req, res) => {
             options.limit = parseInt(limit);
         }
 
-        const users = await userModel.find(criteria, {}, options).lean();
-        const totalCount = await userModel.countDocuments(criteria);
+        const User = await findAllWithPopulate(
+            userModel,
+            criteria,
+            {},
+            options,
+            { path: "courseIds", select: "name image priority feature action locked" }
+        ); const totalCount = await userModel.countDocuments(criteria);
 
-        const usersWithUnread = await Promise.all(users.map(async user => {
+        const usersWithUnread = await Promise.all(User.map(async user => {
             const unreadCount = await chatModel.countDocuments({
                 senderId: user._id,
                 receiverId: loggedInUser?._id,
@@ -159,13 +170,15 @@ export const get_all_users = async (req, res) => {
     }
 };
 
+
 export const get_user_by_id = async (req, res) => {
     reqInfo(req);
     try {
         const { id } = req.params;
         if (!id) return res.status(400).json(new apiResponse(400, "User ID required", {}, {}));
 
-        const user = await userModel.findOne({ _id: new ObjectId(id), isDeleted: false }).lean();
+        const user = await userModel.findOne({ _id: new ObjectId(id), isDeleted: false })
+        .populate('courseIds', 'name image priority feature action locked');
         if (!user) return res.status(404).json(new apiResponse(404, "User not found", {}, {}));
 
         return res.status(200).json(new apiResponse(200, "User fetched successfully", user, {}));
@@ -174,7 +187,6 @@ export const get_user_by_id = async (req, res) => {
         return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
-
 
 export const delete_user_by_id = async (req, res) => {
     reqInfo(req);

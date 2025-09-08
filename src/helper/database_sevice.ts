@@ -3,7 +3,6 @@ export const updateData = async (modelName, criteria, dataToSet, options) => {
     options.lean = true;
     return modelName.findOneAndUpdate(criteria, dataToSet, options);
 }
-
 export const getData = async (modelName, criteria, projection, options) => {
     options.lean = true;
     return modelName.find(criteria, projection, options);

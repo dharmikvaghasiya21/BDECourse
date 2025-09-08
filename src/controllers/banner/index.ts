@@ -49,10 +49,10 @@ export const getAllBanner = async (req, res) => {
     if (type) criteria.type = type;
 
     if (actionFilter) criteria.action = actionFilter;
-
     if (search) {
       criteria.title = { $regex: search, $options: 'si' };
     }
+    
     const pageNum = parseInt(page) || 1;
     const limitNum = parseInt(limit) || 1;
     options.sort = { createdAt: -1 };;

@@ -7,7 +7,7 @@ const categorySchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
   priority: { type: Number, default: 0 },
   feature: { type: Boolean, default: false },
-  action: { type: Boolean, default: false },
+  action: { type: Boolean, default: true },
   isDeleted: { type: Boolean, default: false }
 }, { timestamps: true, versionKey: false });
 

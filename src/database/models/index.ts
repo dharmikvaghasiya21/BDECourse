@@ -10,5 +10,6 @@ export * from './terms-condition';
 export * from './lecture';
 // export * from './chat-student';
 export * from './chat';
+export * from './Professor';
 
  
