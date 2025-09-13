@@ -45,11 +45,14 @@ export const editBanner = async (req, res) => {
 export const getAllBanner = async (req, res) => {
   reqInfo(req);
   try {
-    let { type, search, page, limit } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
+    let { type, search, page, limit, actionFilter } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
     if (type) criteria.type = type;
+
+    if (actionFilter) criteria.action = actionFilter;
     if (search) {
       criteria.title = { $regex: search, $options: 'si' };
     }
+    
     const pageNum = parseInt(page) || 1;
     const limitNum = parseInt(limit) || 1;
     options.sort = { createdAt: -1 };;

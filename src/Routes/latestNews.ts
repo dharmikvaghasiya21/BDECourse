@@ -10,7 +10,7 @@ router.use(adminJWT)
 router.get('/', latestNewsController.listLatestNews);
 router.post('/add', latestNewsController.addLatestNews);
 router.post('/edit', latestNewsController.updateLatestNews);
-router.delete('/:id', latestNewsController.deleteLatestNews);
+router.delete('/delete/:id', latestNewsController.deleteLatestNews);
 router.get('/:id', latestNewsController.getLatestNews);
 
 export const latestNewsRoutes = router;

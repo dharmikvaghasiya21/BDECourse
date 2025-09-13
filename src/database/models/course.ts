@@ -7,9 +7,10 @@ const courseSchema = new mongoose.Schema({
     categoryIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "category" }],
     priority: { type: Number, default: 0 },
     feature: { type: Boolean, default: false },
-    action: { type: Boolean, default: false },
+    action: { type: Boolean, default: true },
     locked: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false }
+    
 }, { timestamps: true, versionKey: false });
 
 export const courseModel = mongoose.model("course", courseSchema);

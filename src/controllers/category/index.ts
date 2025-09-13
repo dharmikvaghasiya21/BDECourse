@@ -51,10 +51,15 @@ export const deleteCategory = async (req, res) => {
 };
 
 export const getAllCategories = async (req, res) => {
+    console.log("req.query", req.query);
     reqInfo(req);
     try {
-        let { type, search, page, limit } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
+        let { type, search, page, limit, featureFilter, actionFilter } = req.query, options: any = { lean: true }, criteria: any = { isDeleted: false };
         if (type) criteria.type = type;
+
+        if (featureFilter) criteria.feature = featureFilter;
+        if (actionFilter) criteria.action = actionFilter;
+
         if (search) {
             criteria.title = { $regex: search, $options: 'si' };
         }

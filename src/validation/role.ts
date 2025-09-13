@@ -25,4 +25,4 @@ export const updateRoleSchema = Joi.object({
         })
     ),
     isActive: Joi.boolean()
-}); 
+});

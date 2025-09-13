@@ -4,6 +4,7 @@ import userRouter from './user'
 import bannerRouter from './banner'
 import categoryRouter from './category'
 import courseRouter from './course'
+import professorRoutes from './Professor'
 // import chatRouter from './chat'
 import { aboutUsRoutes } from './about-us'
 import { privacyPolicyRoutes } from './privacy-policy'
@@ -13,6 +14,7 @@ import { latestNewsRoutes } from './latestNews'
 import { faqRoutes } from './faq'
 import { uploadRoutes } from './upload'
 import { lectureRouter } from './lecture'
+
 import { adminJWT } from '../helper/jwt'
 
 const router = Router()
@@ -30,7 +32,7 @@ router.use('/lecture', lectureRouter);
 router.use('/blog', blogRoutes);
 router.use('/latest-news', latestNewsRoutes);
 router.use('/faq', faqRoutes);
-// router.use('/chat', chatRouter);    
+router.use('/professor', professorRoutes);
 
 router.use(adminJWT);
 router.use('/upload', uploadRoutes);

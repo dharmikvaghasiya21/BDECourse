@@ -66,17 +66,14 @@ export const get_all_faqs = async (req, res) => {
     let options: any = { lean: true };
 
     try {
-        // Search functionality
         if (search) {
             criteria.$or = [
                 { question: { $regex: search, $options: 'si' } },
                 { answer: { $regex: search, $options: 'si' } }
             ];
         }
-
         options.sort = { priority: 1 };
 
-        // Pagination
         if (page && limit) {
             options.skip = (parseInt(page) - 1) * parseInt(limit);
             options.limit = parseInt(limit);
