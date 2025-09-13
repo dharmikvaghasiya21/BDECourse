@@ -20,11 +20,7 @@ export const add_user = async (req, res) => {
             return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("phoneNumber"), {}, {}));
 
         req.body.confirmPassword = req.body.password;
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 592c351227ce0a0c5844db760c21aff4fbbf689d
         const saltRounds = 10;
         body.password = await bcrypt.hash(body.password, saltRounds);
 
