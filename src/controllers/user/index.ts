@@ -20,6 +20,7 @@ export const add_user = async (req, res) => {
             return res.status(409).json(new apiResponse(409, responseMessage.dataAlreadyExist("phoneNumber"), {}, {}));
 
         req.body.confirmPassword = req.body.password;
+
         const saltRounds = 10;
         body.password = await bcrypt.hash(body.password, saltRounds);
 
@@ -50,7 +51,6 @@ export const add_user = async (req, res) => {
 export const edit_user_by_id = async (req, res) => {
     reqInfo(req);
     console.log("Editing user with body:", req.body);
-
     try {
         const { id, email, phoneNumber, password } = req.body;
 
