@@ -18,7 +18,6 @@ export const addCourse = async (req, res) => {
         let isExist = await courseModel.findOne({ priority: body.priority, isDeleted: false });
         if (isExist) {return res.status(400).json(new apiResponse(400, responseMessage.dataAlreadyExist("priority"), {}, {}));
         }
-
         const Course = await new courseModel(body).save();
         await userModel.findByIdAndUpdate(user._id, { $push: { courseIds: Course._id } });
         return res.status(200).json(new apiResponse(200, "Course created", Course, {}));
@@ -50,42 +49,62 @@ export const editCourse = async (req, res) => {
     }
 };
 
+import { ObjectId } from "mongoose";
+
 export const getAllCourses = async (req, res) => {
     reqInfo(req);
     try {
-        let { search, page, limit, featureFilter, actionFilter, userId, sortBy } = req.query,
+        let { search, page, limit, featureFilter, actionFilter, userId, sortBy, startDate, endDate } = req.query,
             options: any = { lean: true },
             criteria: any = { isDeleted: false };
 
+        // 🟢 Feature filter
         if (featureFilter !== undefined) criteria.feature = featureFilter === "true";
+
+        // 🟢 Action filter
         if (actionFilter !== undefined) criteria.action = actionFilter === "true";
 
+        // 🟢 User filter
         if (userId) {
-            criteria.$or = [{ userIds: { $in: [new ObjectId(userId)] }, locked: true }, { locked: false }];
+            criteria.$or = [
+                { userIds: { $in: [new ObjectId(userId)] }, locked: true },
+                { locked: false }
+            ];
         }
 
         if (search) {
-            criteria.name = { $regex: search, $options: "si" };
+            criteria.name = { $regex: search, $options: "i" };
+        }
 
+        if (startDate && endDate) {
+            criteria.createdAt = {
+                $gte: new Date(startDate),  // start date
+                $lte: new Date(endDate)     // end date
+            };
+        } else if (startDate) {
+            criteria.createdAt = { $gte: new Date(startDate) };
+        } else if (endDate) {
+            criteria.createdAt = { $lte: new Date(endDate) };
         }
 
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 10;
+        options.skip = (pageNum - 1) * limitNum;
+        options.limit = limitNum;
 
-        if (page && limit) {
-            options.skip = (pageNum - 1) * limitNum;
-            options.limit = limitNum;
-            options.sort = { createdAt: -1 };
-        }
-
-        options.sort = {};
         if (sortBy) {
             switch (sortBy) {
-                case "firstname_asc":   // A → Z by user firstName
+                case "firstname_asc":   // User firstName A → Z
                     options.sort = { "userIds.firstName": 1 };
                     break;
-                case "firstname_desc":  // Z → A by user firstName
+                case "firstname_desc":  // User firstName Z → A
                     options.sort = { "userIds.firstName": -1 };
+                    break;
+                case "course_asc":      // Course name A → Z
+                    options.sort = { name: 1 };
+                    break;
+                case "course_desc":     // Course name Z → A
+                    options.sort = { name: -1 };
                     break;
                 case "date_newest":     // Newest first
                     options.sort = { createdAt: -1 };
@@ -93,8 +112,8 @@ export const getAllCourses = async (req, res) => {
                 case "date_oldest":     // Oldest first
                     options.sort = { createdAt: 1 };
                     break;
-                default:
-                    options.sort = { createdAt: -1 }; // fallback
+                default:                // fallback
+                    options.sort = { createdAt: -1 };
             }
         } else {
             options.sort = { createdAt: -1 }; // default sort
@@ -107,6 +126,7 @@ export const getAllCourses = async (req, res) => {
             options,
             { path: "userIds", select: "image firstName lastName email phoneNumber refrance education" }
         );
+
         const totalCount = await countData(courseModel, criteria);
 
         const stateObj = {
@@ -115,12 +135,22 @@ export const getAllCourses = async (req, res) => {
             page_limit: Math.ceil(totalCount / limitNum) || 1,
         };
 
-        return res.status(200).json(new apiResponse(200, responseMessage.getDataSuccess("courses fetched"), { course_data: response, totalData: totalCount, state: stateObj }, {}));
+        return res.status(200).json(
+            new apiResponse(
+                200,
+                responseMessage.getDataSuccess("courses fetched"),
+                { course_data: response, totalData: totalCount, state: stateObj },
+                {}
+            )
+        );
     } catch (error) {
-        console.log(error);
-        return res.status(500).json(new apiResponse(500, responseMessage.internalServerError, {}, error));
+        console.log("GetAllCourses Error:", error);
+        return res
+            .status(500)
+            .json(new apiResponse(500, responseMessage.internalServerError, {}, error));
     }
 };
+
 
 
 export const getCourseById = async (req, res) => {
